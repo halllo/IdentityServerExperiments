@@ -4,7 +4,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace ConsoleApplication
+namespace ConsoleClient
 {
 	public class Program
 	{
