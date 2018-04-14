@@ -13,9 +13,7 @@ namespace Api
 	{
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddMvcCore()
-				.AddAuthorization()
-				.AddJsonFormatters();
+			services.AddMvc();
 
 			services.AddAuthentication("Bearer")
 				.AddIdentityServerAuthentication(options =>
@@ -28,6 +26,12 @@ namespace Api
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 		{
+			app.UseCors(builder =>
+				builder.WithOrigins(
+					"http://localhost:4200"
+				).AllowAnyHeader().AllowAnyMethod()
+			);
+
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();

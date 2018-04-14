@@ -6,6 +6,7 @@ import { AppRoutingModule } from './app.routing';
 import { AppComponent } from './app.component';
 import { SimpleLayoutComponent, FullLayoutComponent } from './container';
 import { P404Component } from './views/404/404.component';
+import { RedirectingComponent } from './views/redirecting/redirecting.component';
 import { AuthService } from './services/auth.service';
 import { AuthenticatedGuard, NotAuthenticatedGuard } from './services/auth-guard.service';
 import { Api } from './services/api.service';
@@ -23,6 +24,7 @@ import { Api } from './services/api.service';
     SimpleLayoutComponent,
     FullLayoutComponent,
     P404Component,
+    RedirectingComponent,
   ],
   providers: [
     AuthService,

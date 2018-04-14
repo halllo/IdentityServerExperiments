@@ -57,15 +57,16 @@ namespace IdentityServer
 					ClientId = "spa",
 					ClientName = "SPA App",
 					AllowedGrantTypes = GrantTypes.Implicit,
+					AllowAccessTokensViaBrowser = true,
 					RedirectUris = new List<string>
 					{
-						"http://localhost/signin-oidc"
+						"http://localhost:4200/"
 					},
 					PostLogoutRedirectUris = new List<string>
 					{
-						"http://localhost/signout-oidc-callback"
+						"http://localhost:4200/"
 					},
-					LogoUri = "http://localhost/signout-oidc",
+					//LogoUri = "http://localhost:4200/",
 					AllowedScopes = { "openid", "profile", "api" }
 				},
 			};

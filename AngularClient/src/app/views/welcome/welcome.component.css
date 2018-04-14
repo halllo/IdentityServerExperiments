@@ -10,3 +10,13 @@ main {
 .container.login-area {
     padding: 20px;
 }
+
+@media screen and (max-width: 600px) {
+  main {
+    padding: 20px;
+  }
+
+  h1.display-3 {
+    font-size: 3rem;
+  }
+}

@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { P404Component } from './views/404/404.component';
+import { RedirectingComponent } from './views/redirecting/redirecting.component';
 import { FullLayoutComponent, SimpleLayoutComponent } from './container';
 import { NotAuthenticatedGuard, AuthenticatedGuard } from './services/auth-guard.service';
 
@@ -26,6 +27,10 @@ export const routes: Routes = [
         loadChildren: './views/dashboard/dashboard.module#DashboardModule',
       }
     ]
+  },
+  {
+    path: 'id_token',
+    component: RedirectingComponent
   },
   {
     path: '404',

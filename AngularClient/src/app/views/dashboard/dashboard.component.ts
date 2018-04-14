@@ -20,18 +20,11 @@ export class DashboardComponent {
   }
 
   public getAccessToken() {
-    this.auth.getAccessToken().subscribe(
-      token => {
-        this.access_token = token;
-      },
-      err => {
-        this.access_token = 'Error: ' + err;
-      }
-    );
+    this.access_token = this.auth.accessToken;
   }
 
   public callApi() {
-    this.api.getEinwilligungen('1337').subscribe(
+    this.api.get().subscribe(
       result => {
         this.api_result = result;
       },

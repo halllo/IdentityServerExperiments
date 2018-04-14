@@ -24,7 +24,8 @@ namespace IdentityServer
 			services.AddMvc();
 
 			services.AddIdentityServer()
-				.AddDeveloperSigningCredential()
+				.AddDeveloperSigningCredential() 
+				.AddInMemoryIdentityResources(Config.GetIdentityResources())
 				.AddInMemoryApiResources(Config.GetApis())
 				.AddInMemoryClients(Config.GetClients())
 				.AddTestUsers(Config.GetTestUsers());
@@ -34,6 +35,12 @@ namespace IdentityServer
 		{
 			loggerFactory.AddConsole(Configuration.GetSection("Logging"));
 			loggerFactory.AddDebug();
+
+			app.UseCors(builder =>
+				builder.WithOrigins(
+					"http://localhost:4200"
+				).AllowAnyHeader().AllowAnyMethod()
+			);
 
 			if (env.IsDevelopment())
 			{
