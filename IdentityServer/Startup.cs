@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IdentityServer4.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -23,10 +21,13 @@ namespace IdentityServer
 
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddMvc();
+
 			services.AddIdentityServer()
 				.AddDeveloperSigningCredential()
 				.AddInMemoryApiResources(Config.GetApis())
-				.AddInMemoryClients(Config.GetClients());
+				.AddInMemoryClients(Config.GetClients())
+				.AddTestUsers(Config.GetTestUsers());
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
@@ -38,53 +39,9 @@ namespace IdentityServer
 			{
 				app.UseDeveloperExceptionPage();
 			}
-
+			app.UseStaticFiles(); // Install IdentityServer UI: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/IdentityServer/IdentityServer4.Quickstart.UI/release/get.ps1'))
 			app.UseIdentityServer();
-
-			app.Run(async (context) =>
-			{
-				await context.Response.WriteAsync("This is IdentityServer4!");
-			});
-		}
-	}
-
-	public static class Config
-	{
-		public static IEnumerable<ApiResource> GetApis()
-		{
-			return new ApiResource[]
-			{
-				new ApiResource("api", "Some API"),
-				//new ApiResource
-				//{
-				//	Name = "complicated_api",
-				//	DisplayName = "Complicated API",
-				//	UserClaims = { "name", "email"},
-				//	Scopes =
-				//	{
-				//		new Scope("full_access")
-				//		{
-				//			UserClaims = { "role"}
-				//		},
-				//		new Scope("read_only")
-				//	}
-				//}
-			};
-		}
-
-		public static IEnumerable<Client> GetClients()
-		{
-			return new Client[]
-			{
-				new Client
-				{
-					ClientId = "console",
-					ClientName = "Console App",
-					AllowedGrantTypes = GrantTypes.ClientCredentials,
-					ClientSecrets = { new Secret("secret".Sha256()) },
-					AllowedScopes = { "api" }
-				}
-			};
+			app.UseMvcWithDefaultRoute();
 		}
 	}
 }
