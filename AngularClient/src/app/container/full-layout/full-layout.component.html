@@ -1,0 +1,34 @@
+<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+  <a class="navbar-brand" [routerLink]="['/']" (click)="navbarCollapsed = true">Einwilligungen</a>
+  <button class="navbar-toggler" type="button" (click)="navbarCollapsed = !navbarCollapsed" [attr.aria-expanded]="!navbarCollapsed" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" [ngbCollapse]="navbarCollapsed" id="navbarContent">
+    <ul class="navbar-nav mr-auto">
+      <li class="nav-item" [routerLinkActive]="['active']">
+        <a class="nav-link" [routerLink]="['/dashboard']" (click)="navbarCollapsed = true">Dashboard</a>
+      </li>
+      <li class="nav-item" [routerLinkActive]="['active']">
+        <a class="nav-link" [routerLink]="['/contacts']" (click)="navbarCollapsed = true">Kontakte</a>
+      </li>
+    </ul>
+    <div>
+      <span class="navbar-text user-greeting">Hallo {{auth.username}}</span>
+      <button class="btn btn-sm btn-outline-light" (click)="auth.logout()"><i class="fa fa-unlock"></i> Logout</button>
+    </div>
+  </div>
+</nav>
+
+
+
+<div class="app-body router-content">
+  <router-outlet></router-outlet>
+</div>
+
+
+
+<footer class="container">
+  <hr>
+  <p>&copy; STP 2018</p>
+</footer>
