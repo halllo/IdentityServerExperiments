@@ -12,6 +12,7 @@ namespace Api.Controllers
 	public class IdentityController : Controller
 	{
 		[HttpGet]
+		[Authorize("policy1")]
 		public IActionResult Get()
 		{
 			return new JsonResult(from c in User.Claims select new { c.Type, c.Value });

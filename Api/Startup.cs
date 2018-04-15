@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -22,6 +23,19 @@ namespace Api
 					options.RequireHttpsMetadata = false;
 					options.ApiName = "api"; // audience
 				});
+
+			services.AddAuthorization(options =>
+			{
+				options.AddPolicy("policy1", policy =>
+				{
+					policy.RequireAuthenticatedUser();
+					policy.Requirements.Add(new HasScopeRequirement(
+						scope: "api",
+						issuer: "http://localhost:56311"
+					));
+				});
+			});
+			services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
