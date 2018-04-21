@@ -9,11 +9,11 @@
 
       <p>
         <strong>id_token</strong>
-        <span>{{getIdToken() | json}}</span>
+        <span>{{getIdToken()}}</span>
       </p>
       <p>
-        <button (click)="getAccessToken()">get access_token</button>
-        <span>{{access_token}}</span>
+        <strong>access_token</strong>
+        <span>{{getAccessToken()}}</span>
       </p>
       <p>
         <button (click)="callApi()">call API</button>

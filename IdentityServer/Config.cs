@@ -13,7 +13,7 @@ namespace IdentityServer
 			return new IdentityResource[]
 			{
 				new IdentityResources.OpenId(),
-				new IdentityResources.Profile(),
+				new IdentityResources.Profile()
 			};
 		}
 
@@ -67,7 +67,8 @@ namespace IdentityServer
 						"http://localhost:4200/"
 					},
 					//LogoUri = "http://localhost:4200/",
-					AllowedScopes = { "openid", "profile", "api" }
+					AllowedScopes = { "openid", "profile", "api" },
+					AlwaysIncludeUserClaimsInIdToken = true
 				},
 			};
 		}

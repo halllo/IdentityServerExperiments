@@ -10,7 +10,6 @@ import { Api } from '../../services/api.service';
 })
 export class DashboardComponent {
 
-  public access_token: string;
   public api_result: any;
 
   constructor(private auth: AuthService, private api: Api) { }
@@ -20,7 +19,7 @@ export class DashboardComponent {
   }
 
   public getAccessToken() {
-    this.access_token = this.auth.accessToken;
+    return this.auth.accessToken;
   }
 
   public callApi() {
