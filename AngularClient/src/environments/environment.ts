@@ -10,7 +10,7 @@ export const environment = {
   oidc: {
     authority: 'https://stp.stp-cloud-dev.azure.local/identity/',
     clientId: 'man-test-client',
-    scope: 'openid profile',
+    scope: '*',
     redirectUri: 'http://localhost:4200/',
   }
 

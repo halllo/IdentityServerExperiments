@@ -87,10 +87,6 @@ export class AuthService {
   public logout() {
     this.mgr.signoutRedirect().then(function (resp) {
       console.log('signed out', resp);
-      setTimeout(5000, () => {
-        console.log('testing to see if fired...');
-
-      });
     }).catch(function (err) {
       console.log(err);
     });
