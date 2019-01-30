@@ -5,6 +5,7 @@ export const environment = {
   oidc: {
     authority: 'http://localhost:56311/',
     clientId: 'spa',
+    scope: 'openid profile',
     redirectUri: 'http://localhost:4200/',
   }
 

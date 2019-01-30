@@ -12,7 +12,7 @@ const settings: UserManagerSettings = {
   redirect_uri: environment.oidc.redirectUri,
   post_logout_redirect_uri: environment.oidc.redirectUri,
   response_type: 'id_token token',
-  scope: 'openid profile api',
+  scope: environment.oidc.scope,
 
   silent_redirect_uri: environment.oidc.redirectUri + 'silent-renew.html',
   automaticSilentRenew: true,

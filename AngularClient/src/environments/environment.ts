@@ -8,8 +8,9 @@ export const environment = {
   backend_api: 'http://localhost:56706',
 
   oidc: {
-    authority: 'http://localhost:56311/',
-    clientId: 'spa',
+    authority: 'https://stp.stp-cloud-dev.azure.local/identity/',
+    clientId: 'man-test-client',
+    scope: 'openid profile',
     redirectUri: 'http://localhost:4200/',
   }
 
