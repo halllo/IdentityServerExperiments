@@ -10,7 +10,8 @@ import { Api } from '../../services/api.service';
 })
 export class DashboardComponent {
 
-  public api_result: any;
+  public api_get_result: any;
+  public api_post_result: any;
 
   constructor(private auth: AuthService, private api: Api) { }
 
@@ -22,15 +23,26 @@ export class DashboardComponent {
     return this.auth.accessToken;
   }
 
-  public callApi() {
-    this.api.get().subscribe(
-      result => {
-        this.api_result = result;
-      },
-      err => {
-        this.api_result = err;
-      }
-    );
+  public async invokeApiGet() {
+    try {
+      const result = await this.api.get().toPromise();
+      this.api_get_result = result;
+    } catch (err) {
+      console.error(err);
+      this.api_get_result = err;
+      alert(err);
+    }
+  }
+  
+  public async invokeApiPost() {
+    try {
+      const result = await this.api.post().toPromise();
+      this.api_post_result = result;
+    } catch (err) {
+      console.error(err);
+      this.api_post_result = err;
+      alert(err);
+    }
   }
 
 }

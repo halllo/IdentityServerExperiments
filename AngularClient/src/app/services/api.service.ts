@@ -12,7 +12,19 @@ export class Api {
   constructor(private http: HttpClient, private auth: AuthService) { }
 
   public get(): Observable<Object> {
-    return this.http.get(environment.backend_api + '/api/id/', {
+    return this.http.get(environment.backend_api + '/api/books/', {
+      headers: new HttpHeaders({
+        'Authorization': `Bearer ${this.auth.accessToken}`
+      })
+    }).pipe(
+      map(v => {
+        return v;
+      })
+    );
+  }
+
+  public post(): Observable<Object> {
+    return this.http.post(environment.backend_api + '/api/books/', {}, {
       headers: new HttpHeaders({
         'Authorization': `Bearer ${this.auth.accessToken}`
       })

@@ -22,14 +22,14 @@ namespace Api
 
 			services.AddAuthorization(options =>
 			{
-				options.AddPolicy("Id1", policy =>
+				options.AddPolicy("book.read", policy =>
 				{
 					policy.RequireAuthenticatedUser();
 					policy.Requirements.Add(new HasScopeRequirement(
 						scope: "man.book.read"
 					));
 				});
-				options.AddPolicy("Id2", policy =>
+				options.AddPolicy("book.write", policy =>
 				{
 					policy.RequireAuthenticatedUser();
 					policy.Requirements.Add(new HasScopeRequirement(
