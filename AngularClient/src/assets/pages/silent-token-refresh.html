@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<head>
+    <title></title>
+</head>
+<body>
+<script src="oidc-client.min.js"></script>
+<script>
+    new Oidc.UserManager({ userStore: new Oidc.WebStorageStateStore({ store: window.localStorage }) })
+        .signinSilentCallback()
+        .then(
+            function(result) {}, 
+            function(error) { console.log(err); }
+        );
+</script>
+</body>

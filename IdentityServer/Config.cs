@@ -46,7 +46,8 @@ namespace IdentityServer
 					AllowAccessTokensViaBrowser = true,
 					RedirectUris = new List<string>
 					{
-						"http://localhost:4200/"
+						"http://localhost:4200/",
+						"http://localhost:4200/assets/pages/silent-token-refresh.html"
 					},
 					PostLogoutRedirectUris = new List<string>
 					{

@@ -1,103 +1,183 @@
-import { Injectable, EventEmitter } from '@angular/core';
-import { Router } from '@angular/router';
-import { map, mergeMap, filter, scan } from 'rxjs/operators';
-import { fromPromise } from 'rxjs/observable/fromPromise';
-import { Observable } from 'rxjs/Observable';
-import { UserManager, Log, MetadataService, User, UserManagerSettings } from 'oidc-client';
+import { Injectable } from '@angular/core';
+import { UserManager, User, UserManagerSettings, WebStorageStateStore, Log } from 'oidc-client';
+import { Observable, BehaviorSubject, Subject } from 'rxjs';
+import { map, mergeMap, filter, scan, tap, take } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-
-const settings: UserManagerSettings = {
-  authority: environment.oidc.authority,
-  client_id: environment.oidc.clientId,
-  redirect_uri: environment.oidc.redirectUri,
-  post_logout_redirect_uri: environment.oidc.redirectUri,
-  response_type: 'id_token token',
-  scope: environment.oidc.scope,
-
-  silent_redirect_uri: environment.oidc.redirectUri + 'silent-renew.html',
-  automaticSilentRenew: true,
-  // silentRequestTimeout:10000,
-  filterProtocolClaims: true,
-  loadUserInfo: true
-};
+import { AppConfigService } from './app-config.service';
 
 @Injectable()
 export class AuthService {
-
-  private mgr: UserManager;;
+  private mgr: UserManager;
   private currentUser: User;
-  private loggedIn = false;
 
-  constructor(private router: Router) { }
+  private loggedIn = new BehaviorSubject<boolean>(undefined);
+
+  constructor(private runtimeConfig: AppConfigService) {
+    if (!environment.production) {
+      this.loggedIn.subscribe(n => console.info('loggedIn?', n));
+    }
+  }
 
   public initAndHandleRedirects() {
+    const settings: UserManagerSettings = {
+      authority: environment.oidc.authority,
+      client_id: environment.oidc.clientId,
+      redirect_uri: this.runtimeConfig.basePath,
+      post_logout_redirect_uri: this.runtimeConfig.basePath,
+
+      response_type: 'id_token token',
+      scope: environment.oidc.scope,
+
+      silent_redirect_uri: this.runtimeConfig.basePath + 'assets/pages/silent-token-refresh.html',
+      automaticSilentRenew: true,
+      // silentRequestTimeout: 10000,
+      filterProtocolClaims: true,
+      loadUserInfo: true,
+      monitorSession: true,
+      checkSessionInterval: 2000,
+      userStore: new WebStorageStateStore({ store: window.localStorage })
+    };
+
+    Log.logger = console;
     this.mgr = new UserManager(settings);
 
-    if (window.location.hash.indexOf('id_token') > -1 || window.location.hash.indexOf('access_token') > -1) {
+    if (
+      window.location.hash.indexOf('id_token') > -1 ||
+      window.location.hash.indexOf('access_token') > -1
+    ) {
       this.completeLogin();
     } else {
-      this.mgr.getUser()
-        .then((user) => {
+      this.mgr
+        .getUser()
+        .then(user => {
           if (user) {
-            this.loggedIn = true;
-            this.currentUser = user;
+            if (user.expires_in > 0) {
+              this.currentUser = user;
+              this.loggedIn.next(true);
+            } else {
+              console.info('Access token expired. Trying to silenty acquire new access token...');
+              this.renewToken();
+            }
           } else {
-            this.loggedIn = false;
+            this.loggedIn.next(false);
           }
         })
-        .catch((err) => {
-          this.loggedIn = false;
-        }
-      );
+        .catch(err => {
+          this.loggedIn.next(false);
+        });
     }
 
     this.mgr.events.addUserLoaded(user => {
       this.currentUser = user;
-      this.loggedIn = true;
+      this.loggedIn.next(true);
       if (!environment.production) {
-        console.log('authService addUserLoaded', user);
+        console.log('authService: user loaded', user);
       }
     });
 
-    this.mgr.events.addUserUnloaded((e) => {
+    this.mgr.events.addUserUnloaded(e => {
       if (!environment.production) {
-        console.log('user unloaded');
+        console.log('authService: user unloaded', e);
       }
-      this.loggedIn = false;
+      this.loggedIn.next(false);
+    });
+
+    this.mgr.events.addSilentRenewError(e => {
+      if (!environment.production) {
+        console.log('authService: silent renew error', e);
+      }
+    });
+
+    this.mgr.events.addUserSessionChanged(e => {
+      if (!environment.production) {
+        console.log('authService: user session changed', e);
+      }
+    });
+
+    this.mgr.events.addUserSignedOut(e => {
+      if (!environment.production) {
+        console.log('authService: user signed out', e);
+      }
+      this.mgr.removeUser();
     });
   }
 
   public login() {
-    this.mgr.signinRedirect({ data: 'some data' }).then(function () {
-      console.log('signinRedirect done');
-    }).catch(function (err) {
-      console.log(err);
-    });
+    this.mgr
+      .signinRedirect({ data: 'some data' })
+      .then(function() {
+        if (!environment.production) {
+          console.log('authService: signinRedirect done');
+        }
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
   }
   private completeLogin() {
-    const that = this;
-    this.mgr.signinRedirectCallback().then(function (user) {
-      console.log('signed in', user);
-      that.router.navigate(['']);
-    }).catch(function (err) {
-      console.log(err);
-    });
+    this.mgr
+      .signinRedirectCallback()
+      .then(function(user) {
+        if (!environment.production) {
+          console.log('authService: signed in', user);
+        }
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
+  }
+
+  public renewToken() {
+    if (!environment.production) {
+      console.log('authService: signinSilent...');
+    }
+    this.mgr.signinSilent()
+      .then(function() {
+        if (!environment.production) {
+          console.log('authService: signinSilent done');
+        }
+      })
+      .catch(function(err) {
+        console.log('Silent token refresh failed.', err);
+      });
   }
 
   public logout() {
-    this.mgr.signoutRedirect().then(function (resp) {
-      console.log('signed out', resp);
-    }).catch(function (err) {
-      console.log(err);
-    });
+    this.mgr
+      .signoutRedirect()
+      .then(function(resp) {
+        if (!environment.production) {
+          console.log('authService: signed out', resp);
+        }
+      })
+      .catch(function(err) {
+        console.log(err);
+      });
   }
 
-  public get authenticated(): boolean {
-    return this.loggedIn;
+  public get currentlyAuthenticated(): Promise<boolean> {
+    return this.loggedIn.pipe(
+      filter(l => l !== undefined),
+      take(1)
+    ).toPromise();
+  }
+
+  public get authenticated(): Observable<boolean> {
+    return this.loggedIn.pipe(
+      filter(l => l !== undefined)
+    );
   }
 
   public get username(): string {
-    return this.currentUser.profile.name;
+    return this.currentUser.profile.given_name || this.currentUser.profile.name;
+  }
+
+  public get userAvatarUrl(): string {
+    return this.runtimeConfig.prefixOrigin(`~/usermanagement/api/users/${this.subject}/avatar`);
+  }
+
+  public get subject(): string {
+    return this.currentUser.profile.sub;
   }
 
   public get idToken(): string {
@@ -108,4 +188,11 @@ export class AuthService {
     return this.currentUser.access_token;
   }
 
+  public get scopes(): string[] {
+    return this.currentUser.scopes;
+  }
+
+  public hasScope(scope: string): boolean {
+    return !scope || this.scopes.includes(scope);
+  }
 }

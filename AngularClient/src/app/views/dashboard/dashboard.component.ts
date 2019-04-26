@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
-import { map, mergeMap, filter, scan } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
-import { error } from 'protractor';
 import { Api } from '../../services/api.service';
 
 @Component({

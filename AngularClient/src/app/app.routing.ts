@@ -7,11 +7,8 @@ import { NotAuthenticatedGuard, AuthenticatedGuard } from './services/auth-guard
 
 
 export const routes: Routes = [
-  {
-    path: '',
-    redirectTo: '/welcome',
-    pathMatch: 'full',
-  },
+  { path: '', redirectTo: 'welcome', pathMatch: 'full' },
+  { path: 'loggedin', redirectTo: 'dashboard', pathMatch: 'full' },
   {
     path: 'welcome',
     loadChildren: './views/welcome/welcome.module#WelcomeModule',
