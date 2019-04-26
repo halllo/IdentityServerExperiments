@@ -25,6 +25,7 @@ namespace IdentityServer
 				b.AddConfiguration(Configuration.GetSection("Logging"));
 				b.AddDebug();
 				b.AddConsole();
+				b.AddAzureWebAppDiagnostics();
 			});
 			services.AddCors();
 			services.AddMvc();

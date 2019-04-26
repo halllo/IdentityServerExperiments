@@ -9,6 +9,7 @@
 		<PackageReference Include="IdentityServer4" Version="2.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.2.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="4.5.1" />
 	</ItemGroup>
 
