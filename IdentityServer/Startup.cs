@@ -49,10 +49,7 @@ namespace IdentityServer
 		{
 			app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-			}
+			app.UseDeveloperExceptionPage();
 
 			app.UseIdentityServer();
 
