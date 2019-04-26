@@ -1,0 +1,36 @@
+# ASP.NET Core
+# Build and test ASP.NET Core projects targeting .NET Core.
+# Add steps that run tests, create a NuGet package, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+  branches:
+    include:
+    - master
+  paths:
+    include:
+    - AngularClient/*
+
+pool:
+  vmImage: 'Ubuntu-16.04'
+
+variables:
+  buildConfiguration: 'Release'
+
+steps:
+- task: Npm@1
+  displayName: Restore
+  inputs:
+    command: 'install'
+    workingDir: 'AngularClient'
+- task: Npm@1
+  displayName: Build
+  inputs:
+    command: 'custom'
+    workingDir: 'AngularClient'
+    customCommand: 'run build'
+- task: PublishBuildArtifacts@1
+  displayName: Publish Build Artifact
+  inputs:
+    PathtoPublish: 'AngularClient/dist'
+    ArtifactName: 'drop'
