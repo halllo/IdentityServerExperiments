@@ -30,7 +30,7 @@ namespace IdentityServer
 			services.AddMvc();
 
 			services.AddIdentityServer()
-				//.AddDeveloperSigningCredential()
+				.AddSigningCredentialFromKeyVault()
 				.AddInMemoryIdentityResources(Config.GetIdentityResources())
 				.AddInMemoryApiResources(Config.GetApis())
 				.AddInMemoryClients(Config.GetClients())
