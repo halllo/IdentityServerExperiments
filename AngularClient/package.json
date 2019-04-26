@@ -5,6 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
+    "start-ssl": "ng serve --ssl true --ssl-key /node_modules/browser-sync/certs/server.key --ssl-cert /node_modules/browser-sync/certs/server.crt",
     "build": "ng build --prod",
     "test": "ng test",
     "lint": "ng lint",
@@ -38,6 +39,7 @@
     "@types/jasmine": "^3.3.12",
     "@types/jasminewd2": "^2.0.6",
     "@types/node": "^11.13.7",
+    "browser-sync": "^2.26.5",
     "codelyzer": "^5.0.1",
     "jasmine-core": "^3.4.0",
     "jasmine-spec-reporter": "~4.2.1",
