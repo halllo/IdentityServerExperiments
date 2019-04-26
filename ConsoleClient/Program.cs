@@ -11,8 +11,8 @@ namespace ConsoleClient
 		const string authority = "http://localhost:56311/";
 		const string clientId = "console";
 		const string clientSecret = "secret";
-		const string scope = "api";
-		const string apiUrl = "http://localhost:56706/api/id";
+		const string scope = "book.read";
+		const string apiUrl = "http://localhost:56706/api/books";
 
 		static void Main(string[] args) => MainAsync().GetAwaiter().GetResult();
 
@@ -28,16 +28,22 @@ namespace ConsoleClient
 
 		private static async Task<string> GetTokenAsync()
 		{
-			var discoveryClient = new DiscoveryClient(authority);
-			var discoveryResponse = await discoveryClient.GetAsync();
+			var discoveryClient = new HttpClient();
+			var discoveryResponse = await discoveryClient.GetDiscoveryDocumentAsync(authority);
 			if (discoveryResponse.IsError)
 			{
 				Console.WriteLine($"Disco error: {discoveryResponse.Error}");
 				return null;
 			}
 
-			var tokenClient = new TokenClient(discoveryResponse.TokenEndpoint, clientId, clientSecret);
-			var tokenResponse = await tokenClient.RequestClientCredentialsAsync(scope);
+			var tokenClient = new HttpClient();
+			var tokenResponse = await tokenClient.RequestClientCredentialsTokenAsync(new ClientCredentialsTokenRequest
+			{
+				Address = discoveryResponse.TokenEndpoint,
+				ClientId = clientId,
+				ClientSecret = clientSecret,
+				Scope = scope
+			});
 			if (tokenResponse.IsError)
 			{
 				Console.WriteLine($"Token endpoint error: {tokenResponse.Error}");

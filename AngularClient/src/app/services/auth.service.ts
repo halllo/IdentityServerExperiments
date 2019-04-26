@@ -172,10 +172,6 @@ export class AuthService {
     return this.currentUser.profile.given_name || this.currentUser.profile.name;
   }
 
-  public get userAvatarUrl(): string {
-    return this.runtimeConfig.prefixOrigin(`~/usermanagement/api/users/${this.subject}/avatar`);
-  }
-
   public get subject(): string {
     return this.currentUser.profile.sub;
   }

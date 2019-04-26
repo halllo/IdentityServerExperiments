@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <Authors>Manuel Naujoks</Authors>
   </PropertyGroup>
 
   <ItemGroup>
