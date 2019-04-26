@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Security.Claims;
-using IdentityServer4.Models;
+﻿using IdentityServer4.Models;
 using IdentityServer4.Test;
+using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace IdentityServer
 {
@@ -21,21 +21,7 @@ namespace IdentityServer
 		{
 			return new ApiResource[]
 			{
-				new ApiResource("api", "Some API"),
-				//new ApiResource
-				//{
-				//	Name = "complicated_api",
-				//	DisplayName = "Complicated API",
-				//	UserClaims = { "name", "email"},
-				//	Scopes =
-				//	{
-				//		new Scope("full_access")
-				//		{
-				//			UserClaims = { "role"}
-				//		},
-				//		new Scope("read_only")
-				//	}
-				//}
+				new ApiResource("api", "Some API")
 			};
 		}
 		#endregion

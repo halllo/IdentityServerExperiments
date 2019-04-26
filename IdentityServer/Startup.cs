@@ -1,12 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using IdentityServer4.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 
 namespace IdentityServer
 {
@@ -21,34 +20,60 @@ namespace IdentityServer
 
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddLogging(b =>
+			{
+				b.AddConfiguration(Configuration.GetSection("Logging"));
+				b.AddDebug();
+				b.AddConsole();
+			});
+			services.AddCors();
 			services.AddMvc();
 
 			services.AddIdentityServer()
-				.AddDeveloperSigningCredential() 
+				.AddDeveloperSigningCredential()
 				.AddInMemoryIdentityResources(Config.GetIdentityResources())
 				.AddInMemoryApiResources(Config.GetApis())
 				.AddInMemoryClients(Config.GetClients())
-				.AddTestUsers(Config.GetTestUsers());
+				.AddTestUsers(Config.GetTestUsers())
+				.AddCorsPolicyService<AllAllowedCorsPolicyService>()
+				;
+
+			services.Configure<CookiePolicyOptions>(options =>
+			{
+				options.CheckConsentNeeded = context => { return true; };
+				options.MinimumSameSitePolicy = SameSiteMode.None;
+			});
 		}
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
 		{
-			loggerFactory.AddConsole(Configuration.GetSection("Logging"));
-			loggerFactory.AddDebug();
-
-			app.UseCors(builder =>
-				builder.WithOrigins(
-					"http://localhost:4200"
-				).AllowAnyHeader().AllowAnyMethod()
-			);
+			app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
 			if (env.IsDevelopment())
 			{
 				app.UseDeveloperExceptionPage();
 			}
-			app.UseStaticFiles(); // Install IdentityServer UI: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/IdentityServer/IdentityServer4.Quickstart.UI/release/get.ps1'))
+
 			app.UseIdentityServer();
+
+			app.UseDefaultFiles();
+			app.UseStaticFiles(); // Install IdentityServer UI: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/IdentityServer/IdentityServer4.Quickstart.UI/release/get.ps1'))
+
+			app.UseCookiePolicy();
 			app.UseMvcWithDefaultRoute();
+		}
+	}
+
+
+
+
+
+
+	public class AllAllowedCorsPolicyService : ICorsPolicyService
+	{
+		public Task<bool> IsOriginAllowedAsync(string origin)
+		{
+			return Task.FromResult(true);
 		}
 	}
 }
