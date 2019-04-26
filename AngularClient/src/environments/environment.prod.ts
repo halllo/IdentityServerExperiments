@@ -1,12 +1,11 @@
 export const environment = {
   production: true,
-  backend_api: 'http://localhost:56706',
+  backend_api: 'https://manuels-identityserver-api.azurewebsites.net/',
 
   oidc: {
-    authority: 'http://localhost:56311/',
+    authority: 'https://manuels-identityserver.azurewebsites.net/',
     clientId: 'angularclient',
     scope: 'openid profile book.read book.write',
-    redirectUri: 'http://localhost:4200/',
   }
 
 };

@@ -54,11 +54,14 @@ namespace IdentityServer
 					RedirectUris = new List<string>
 					{
 						"http://localhost:4200/",
-						"http://localhost:4200/assets/pages/silent-token-refresh.html"
+						"http://localhost:4200/assets/pages/silent-token-refresh.html",
+						"https://manuels-angularclient.azurewebsites.net/",
+						"https://manuels-angularclient.azurewebsites.net/assets/pages/silent-token-refresh.html"
 					},
 					PostLogoutRedirectUris = new List<string>
 					{
-						"http://localhost:4200/"
+						"http://localhost:4200/",
+						"https://manuels-angularclient.azurewebsites.net/",
 					},
 					AllowedScopes = { "openid", "profile", "book.read", "book.write" },
 					AlwaysIncludeUserClaimsInIdToken = true
