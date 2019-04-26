@@ -21,7 +21,14 @@ namespace IdentityServer
 		{
 			return new ApiResource[]
 			{
-				new ApiResource("api", "Some API")
+				new ApiResource("books-api", "Books API")
+				{
+					Scopes = new List<Scope>
+					{
+						new Scope("book.read", "Reading Books"),
+						new Scope("book.write", "Writing Books"),
+					}
+				}
 			};
 		}
 		#endregion
@@ -36,12 +43,12 @@ namespace IdentityServer
 					ClientName = "Console App",
 					AllowedGrantTypes = GrantTypes.ClientCredentials,
 					ClientSecrets = { new Secret("secret".Sha256()) },
-					AllowedScopes = { "api" }
+					AllowedScopes = { "book.read" }
 				},
 				new Client
 				{
-					ClientId = "spa",
-					ClientName = "SPA App",
+					ClientId = "angularclient",
+					ClientName = "Angular Client",
 					AllowedGrantTypes = GrantTypes.Implicit,
 					AllowAccessTokensViaBrowser = true,
 					RedirectUris = new List<string>
@@ -53,8 +60,7 @@ namespace IdentityServer
 					{
 						"http://localhost:4200/"
 					},
-					//LogoUri = "http://localhost:4200/",
-					AllowedScopes = { "openid", "profile", "api" },
+					AllowedScopes = { "openid", "profile", "book.read", "book.write" },
 					AlwaysIncludeUserClaimsInIdToken = true
 				},
 			};

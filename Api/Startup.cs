@@ -2,12 +2,20 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Api
 {
 	public class Startup
 	{
+		public Startup(IConfiguration configuration)
+		{
+			Configuration = configuration;
+		}
+
+		public IConfiguration Configuration { get; }
+
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddMvc();
@@ -15,9 +23,9 @@ namespace Api
 			services.AddAuthentication("Bearer")
 				.AddIdentityServerAuthentication(options =>
 				{
-					options.Authority = "https://stp.stp-cloud-dev.azure.local/identity/";
+					options.Authority = Configuration["Authority"];
 					options.RequireHttpsMetadata = false;
-					options.ApiName = "man-test-api"; // audience
+					options.ApiName = Configuration["Audience"];
 				});
 
 			services.AddAuthorization(options =>
@@ -26,14 +34,14 @@ namespace Api
 				{
 					policy.RequireAuthenticatedUser();
 					policy.Requirements.Add(new HasScopeRequirement(
-						scope: "man.book.read"
+						scope: "book.read"
 					));
 				});
 				options.AddPolicy("book.write", policy =>
 				{
 					policy.RequireAuthenticatedUser();
 					policy.Requirements.Add(new HasScopeRequirement(
-						scope: "man.book.write"
+						scope: "book.write"
 					));
 				});
 			});
@@ -42,10 +50,7 @@ namespace Api
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
 		{
-			app.UseCors(builder =>
-				builder.WithOrigins(
-					"http://localhost:4200"
-				).AllowAnyHeader().AllowAnyMethod()
+			app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()
 			);
 
 			if (env.IsDevelopment())

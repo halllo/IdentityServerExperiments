@@ -4,8 +4,8 @@ export const environment = {
 
   oidc: {
     authority: 'http://localhost:56311/',
-    clientId: 'spa',
-    scope: 'openid profile',
+    clientId: 'angularclient',
+    scope: 'openid profile book.read book.write',
     redirectUri: 'http://localhost:4200/',
   }
 
