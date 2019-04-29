@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
 
 @Injectable()
 export class AppConfigService {
@@ -21,9 +22,23 @@ export class AppConfigService {
     }
   }
 
+  public origin(url: string): string {
+    const pathArray = url.split( '/' );
+    const protocol = pathArray[0];
+    const host = pathArray[2];
+    return protocol + '//' + host;
+  }
+
+  public isMyOrigin(url: string): boolean {
+    const myOrigin = this.origin(location.origin);
+    const otherOrigin = this.origin(this.prefixOrigin(url));
+    return myOrigin === otherOrigin;
+  }
+
   public get basePath(): string {
     return this._basePath;
   }
+
 }
 
 export const appInitializerFn = (appConfig: AppConfigService) => {

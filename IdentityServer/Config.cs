@@ -1,5 +1,6 @@
 ﻿using IdentityServer4.Models;
 using IdentityServer4.Test;
+using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 
@@ -50,6 +51,7 @@ namespace IdentityServer
 					ClientId = "angularclient",
 					ClientName = "Angular Client",
 					AllowedGrantTypes = GrantTypes.Implicit,
+					AccessTokenLifetime = (int)TimeSpan.FromMinutes(5).TotalSeconds,
 					AllowAccessTokensViaBrowser = true,
 					RedirectUris = new List<string>
 					{

@@ -19,6 +19,10 @@ export class AuthService {
   }
 
   public initAndHandleRedirects() {
+    const monitorSessionDefault = this.runtimeConfig.isMyOrigin(this.runtimeConfig.prefixOrigin(environment.oidc.authority));
+    const monitorSession = (<any>(environment.oidc)).monitorSession == undefined ? monitorSessionDefault : (<any>(environment.oidc)).monitorSession
+    console.log('authService: monitor session?', monitorSession);
+
     const settings: UserManagerSettings = {
       authority: environment.oidc.authority,
       client_id: environment.oidc.clientId,
@@ -33,7 +37,7 @@ export class AuthService {
       // silentRequestTimeout: 10000,
       filterProtocolClaims: true,
       loadUserInfo: true,
-      monitorSession: true,
+      monitorSession: monitorSession,
       checkSessionInterval: 2000,
       userStore: new WebStorageStateStore({ store: window.localStorage })
     };
@@ -83,19 +87,19 @@ export class AuthService {
     });
 
     this.mgr.events.addSilentRenewError(e => {
-      if (!environment.production) {
+      /*if (!environment.production)*/ {
         console.log('authService: silent renew error', e);
       }
     });
 
     this.mgr.events.addUserSessionChanged(e => {
-      if (!environment.production) {
+      /*if (!environment.production)*/ {
         console.log('authService: user session changed', e);
       }
     });
 
     this.mgr.events.addUserSignedOut(e => {
-      if (!environment.production) {
+      /*if (!environment.production)*/ {
         console.log('authService: user signed out', e);
       }
       this.mgr.removeUser();
@@ -128,12 +132,12 @@ export class AuthService {
   }
 
   public renewToken() {
-    if (!environment.production) {
+    /*if (!environment.production)*/ {
       console.log('authService: signinSilent...');
     }
     this.mgr.signinSilent()
       .then(function() {
-        if (!environment.production) {
+        /*if (!environment.production)*/ {
           console.log('authService: signinSilent done');
         }
       })
