@@ -21,7 +21,7 @@ export class AuthService {
   public initAndHandleRedirects() {
     Log.logger = console;
 
-    const monitorSessionDefault = this.runtimeConfig.isMyOrigin(this.runtimeConfig.prefixOrigin(environment.oidc.authority));
+    const monitorSessionDefault = this.runtimeConfig.isMyOrigin(environment.oidc.authority);
     const monitorSession = (<any>(environment.oidc)).monitorSession == undefined ? monitorSessionDefault : (<any>(environment.oidc)).monitorSession;
     /*if (!environment.production)*/ {
       console.log('authService: monitor session?', monitorSession);

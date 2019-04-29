@@ -23,7 +23,8 @@ export class AppConfigService {
   }
 
   public origin(url: string): string {
-    const pathArray = url.split( '/' );
+    const absoluteUrl = this.prefixOrigin(url);
+    const pathArray = absoluteUrl.split( '/' );
     const protocol = pathArray[0];
     const host = pathArray[2];
     return protocol + '//' + host;
@@ -31,7 +32,7 @@ export class AppConfigService {
 
   public isMyOrigin(url: string): boolean {
     const myOrigin = this.origin(location.origin);
-    const otherOrigin = this.origin(this.prefixOrigin(url));
+    const otherOrigin = this.origin(url);
     return myOrigin === otherOrigin;
   }
 
