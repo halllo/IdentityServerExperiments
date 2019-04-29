@@ -5,3 +5,27 @@
 .user-greeting {
   padding-right: 1rem;
 }
+
+div.blurred-out {
+  filter: blur(5px);
+  -webkit-filter: blur(5px);
+  -moz-filter: blur(5px);
+  -o-filter: blur(5px);
+  -ms-filter: blur(5px);
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+div.blurred-out-message {
+  z-index: 1500;
+  position: fixed;
+  top: 40%;
+}
+
+div.blurred-out-message > .text-center  {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  align-items: center;
+}

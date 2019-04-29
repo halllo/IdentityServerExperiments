@@ -1,31 +1,42 @@
-<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-  <a class="navbar-brand" [routerLink]="['/']" (click)="navbarCollapsed = true">Angular Client</a>
-  <button class="navbar-toggler" type="button" (click)="navbarCollapsed = !navbarCollapsed" [attr.aria-expanded]="!navbarCollapsed" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
+<div [ngClass]="{'blurred-out': !(auth.authenticated | async)}">
 
-  <div class="collapse navbar-collapse" [ngbCollapse]="navbarCollapsed" id="navbarContent">
-    <ul class="navbar-nav mr-auto">
-      <li class="nav-item" [routerLinkActive]="['active']">
-        <a class="nav-link" [routerLink]="['/dashboard']" (click)="navbarCollapsed = true">Dashboard</a>
-      </li>
-    </ul>
-    <div>
-      <span class="navbar-text user-greeting">Hallo {{auth.username}}</span>
-      <button class="btn btn-sm btn-outline-light" (click)="auth.logout()"><i class="fa fa-unlock"></i> Logout</button>
+  <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+    <a class="navbar-brand" [routerLink]="['/']" (click)="navbarCollapsed = true">Angular Client</a>
+    <button class="navbar-toggler" type="button" (click)="navbarCollapsed = !navbarCollapsed" [attr.aria-expanded]="!navbarCollapsed" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    
+    <div class="collapse navbar-collapse" [ngbCollapse]="navbarCollapsed" id="navbarContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item" [routerLinkActive]="['active']">
+          <a class="nav-link" [routerLink]="['/dashboard']" (click)="navbarCollapsed = true">Dashboard</a>
+        </li>
+      </ul>
+      <div>
+        <span class="navbar-text user-greeting">Hallo {{auth.username}}</span>
+        <button class="btn btn-sm btn-outline-light" (click)="auth.logout()"><i class="fa fa-unlock"></i> Logout</button>
+      </div>
     </div>
+  </nav>
+  
+  
+  
+  <div class="app-body router-content">
+    <router-outlet></router-outlet>
   </div>
-</nav>
-
-
-
-<div class="app-body router-content">
-  <router-outlet></router-outlet>
+  
+  
+  <footer class="container">
+    <hr>
+    <p>by Manuel Naujoks 2019</p>
+  </footer>
+  
 </div>
 
-
-
-<footer class="container">
-  <hr>
-  <p>by Manuel Naujoks 2019</p>
-</footer>
+<div class="blurred-out-message w-100" *ngIf="!(auth.authenticated | async)">
+  <p class="text-center h4">
+    Your session has expired. <br>
+    Please click continue to sign in.
+    <button class="btn btn-primary mt-2" (click)="continueToSignin()">Continue</button>
+  </p>
+</div>
