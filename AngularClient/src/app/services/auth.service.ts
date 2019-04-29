@@ -19,10 +19,14 @@ export class AuthService {
   }
 
   public initAndHandleRedirects() {
-    const monitorSessionDefault = this.runtimeConfig.isMyOrigin(this.runtimeConfig.prefixOrigin(environment.oidc.authority));
-    const monitorSession = (<any>(environment.oidc)).monitorSession == undefined ? monitorSessionDefault : (<any>(environment.oidc)).monitorSession
-    console.log('authService: monitor session?', monitorSession);
+    Log.logger = console;
 
+    const monitorSessionDefault = this.runtimeConfig.isMyOrigin(this.runtimeConfig.prefixOrigin(environment.oidc.authority));
+    const monitorSession = (<any>(environment.oidc)).monitorSession == undefined ? monitorSessionDefault : (<any>(environment.oidc)).monitorSession;
+    /*if (!environment.production)*/ {
+      console.log('authService: monitor session?', monitorSession);
+    }
+    
     const settings: UserManagerSettings = {
       authority: environment.oidc.authority,
       client_id: environment.oidc.clientId,
@@ -42,7 +46,6 @@ export class AuthService {
       userStore: new WebStorageStateStore({ store: window.localStorage })
     };
 
-    Log.logger = console;
     this.mgr = new UserManager(settings);
 
     if (
@@ -74,13 +77,13 @@ export class AuthService {
     this.mgr.events.addUserLoaded(user => {
       this.currentUser = user;
       this.loggedIn.next(true);
-      if (!environment.production) {
+      /*if (!environment.production)*/ {
         console.log('authService: user loaded', user);
       }
     });
 
     this.mgr.events.addUserUnloaded(e => {
-      if (!environment.production) {
+      /*if (!environment.production)*/ {
         console.log('authService: user unloaded', e);
       }
       this.loggedIn.next(false);
@@ -90,6 +93,7 @@ export class AuthService {
       /*if (!environment.production)*/ {
         console.log('authService: silent renew error', e);
       }
+      this.loggedIn.next(false);
     });
 
     this.mgr.events.addUserSessionChanged(e => {
@@ -135,6 +139,7 @@ export class AuthService {
     /*if (!environment.production)*/ {
       console.log('authService: signinSilent...');
     }
+    const that = this;
     this.mgr.signinSilent()
       .then(function() {
         /*if (!environment.production)*/ {
@@ -143,6 +148,7 @@ export class AuthService {
       })
       .catch(function(err) {
         console.log('Silent token refresh failed.', err);
+        that.loggedIn.next(false);
       });
   }
 
