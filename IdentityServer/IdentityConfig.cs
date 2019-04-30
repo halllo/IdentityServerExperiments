@@ -6,7 +6,7 @@ using System.Security.Claims;
 
 namespace IdentityServer
 {
-	public static class Config
+	public static class IdentityConfig
 	{
 		#region Scopes = Resources (Identity Resources und API Resources)
 		public static IEnumerable<IdentityResource> GetIdentityResources()

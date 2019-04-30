@@ -11,12 +11,20 @@ namespace IdentityServer
 {
 	public class Startup
 	{
-		public Startup(IConfiguration configuration)
+		public Startup(IHostingEnvironment env)
 		{
-			Configuration = configuration;
+			var builder = new ConfigurationBuilder()
+				.SetBasePath(env.ContentRootPath)
+				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+				.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+				.AddEnvironmentVariables()
+				.AddAzureKeyVault()
+				;
+
+			Configuration = builder.Build();
 		}
 
-		public IConfiguration Configuration { get; }
+		private IConfiguration Configuration { get; }
 
 		public void ConfigureServices(IServiceCollection services)
 		{
@@ -30,12 +38,14 @@ namespace IdentityServer
 			services.AddCors();
 			services.AddMvc();
 
+			var serviceProvider = services.BuildServiceProvider();
+
 			services.AddIdentityServer()
-				.AddSigningCredentialFromKeyVault()
-				.AddInMemoryIdentityResources(Config.GetIdentityResources())
-				.AddInMemoryApiResources(Config.GetApis())
-				.AddInMemoryClients(Config.GetClients())
-				.AddTestUsers(Config.GetTestUsers())
+				.AddSigningCredentialFromKeyVault(Configuration, serviceProvider.GetService<ILogger<Startup>>())
+				.AddInMemoryIdentityResources(IdentityConfig.GetIdentityResources())
+				.AddInMemoryApiResources(IdentityConfig.GetApis())
+				.AddInMemoryClients(IdentityConfig.GetClients())
+				.AddTestUsers(IdentityConfig.GetTestUsers())
 				.AddCorsPolicyService<AllAllowedCorsPolicyService>()
 				;
 
