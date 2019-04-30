@@ -6,6 +6,7 @@ using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
 
@@ -18,12 +19,14 @@ namespace IdentityServer4.Quickstart.UI
 		private readonly IIdentityServerInteractionService _interaction;
 		private readonly IHostingEnvironment _environment;
 		private readonly ILogger _logger;
+		private readonly IConfiguration _config;
 
-		public HomeController(IIdentityServerInteractionService interaction, IHostingEnvironment environment, ILogger<HomeController> logger)
+		public HomeController(IIdentityServerInteractionService interaction, IHostingEnvironment environment, ILogger<HomeController> logger, IConfiguration config)
 		{
 			_interaction = interaction;
 			_environment = environment;
 			_logger = logger;
+			_config = config;
 		}
 
 		public IActionResult Index()

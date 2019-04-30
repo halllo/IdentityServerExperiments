@@ -11,16 +11,16 @@ namespace IdentityServer
 {
 	public static class KeyVault
 	{
-		private static readonly Func<IConfiguration, string> _KeyVault = config => config["KeyVault"];
-		private static readonly Func<IConfiguration, string> _KeyVaultClientId = config => config["KeyVaultClientId"];
-		private static readonly Func<IConfiguration, string> _KeyVaultClientSecret = config => config["KeyVaultClientSecret"];
+		public static readonly Func<IConfiguration, string> Url = config => config["KeyVault"];
+		public static readonly Func<IConfiguration, string> ClientId = config => config["KeyVaultClientId"];
+		public static readonly Func<IConfiguration, string> ClientSecret = config => config["KeyVaultClientSecret"];
 
 		public static IConfigurationBuilder AddAzureKeyVault(this IConfigurationBuilder builder)
 		{
 			IConfiguration config = builder.Build();
 			if (IsKeyVaultConfigured(config))
 			{
-				builder.AddAzureKeyVault(_KeyVault(config), _KeyVaultClientId(config), _KeyVaultClientSecret(config));
+				builder.AddAzureKeyVault(Url(config), ClientId(config), ClientSecret(config));
 			}
 
 			return builder;
@@ -42,17 +42,17 @@ namespace IdentityServer
 			return builder;
 		}
 
-		private static async Task<X509Certificate2> DownloadCertificateWithPrivateKey(IConfiguration config, ILogger logger, string certificateName)
+		public static async Task<X509Certificate2> DownloadCertificateWithPrivateKey(IConfiguration config, ILogger logger, string certificateName)
 		{
 			try
 			{
 				using (var kvClient = new KeyVaultClient(GetToken))
 				{
-					var kvCertificate = await kvClient.GetCertificateAsync($"{_KeyVault(config).NoEndingSlash()}/certificates/{certificateName}");
+					var kvCertificate = await kvClient.GetCertificateAsync($"{Url(config).NoEndingSlash()}/certificates/{certificateName}");
 					var kvCertificateSecret = await kvClient.GetSecretAsync(kvCertificate.SecretIdentifier.BaseIdentifier);
 
 					var publicAndPrivateKey = Convert.FromBase64String(kvCertificateSecret.Value);
-					var certificate = new X509Certificate2(publicAndPrivateKey);
+					var certificate = new X509Certificate2(publicAndPrivateKey, (string)null, X509KeyStorageFlags.MachineKeySet);
 					return certificate;
 				}
 			}
@@ -65,7 +65,7 @@ namespace IdentityServer
 			async Task<string> GetToken(string authority, string resource, string scope)
 			{
 				var authContext = new AuthenticationContext(authority);
-				var clientCred = new ClientCredential(_KeyVaultClientId(config), _KeyVaultClientSecret(config));
+				var clientCred = new ClientCredential(ClientId(config), ClientSecret(config));
 				var result = await authContext.AcquireTokenAsync(resource, clientCred);
 				return result.AccessToken;
 			}
@@ -73,9 +73,9 @@ namespace IdentityServer
 
 		private static bool IsKeyVaultConfigured(IConfiguration config)
 		{
-			return !string.IsNullOrWhiteSpace(_KeyVault(config))
-				&& !string.IsNullOrWhiteSpace(_KeyVaultClientId(config))
-				&& !string.IsNullOrWhiteSpace(_KeyVaultClientSecret(config));
+			return !string.IsNullOrWhiteSpace(Url(config))
+				&& !string.IsNullOrWhiteSpace(ClientId(config))
+				&& !string.IsNullOrWhiteSpace(ClientSecret(config));
 		}
 	}
 }
