@@ -1,11 +1,9 @@
-﻿using IdentityServer4.Services;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
 
 namespace IdentityServer
 {
@@ -46,7 +44,6 @@ namespace IdentityServer
 				.AddInMemoryApiResources(IdentityConfig.GetApis())
 				.AddInMemoryClients(IdentityConfig.GetClients())
 				.AddTestUsers(IdentityConfig.GetTestUsers())
-				.AddCorsPolicyService<AllAllowedCorsPolicyService>()
 				;
 
 			services.Configure<CookiePolicyOptions>(options =>
@@ -58,7 +55,7 @@ namespace IdentityServer
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
 		{
-			app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+			app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod());
 
 			app.UseDeveloperExceptionPage();
 
@@ -69,19 +66,6 @@ namespace IdentityServer
 
 			app.UseCookiePolicy();
 			app.UseMvcWithDefaultRoute();
-		}
-	}
-
-
-
-
-
-
-	public class AllAllowedCorsPolicyService : ICorsPolicyService
-	{
-		public Task<bool> IsOriginAllowedAsync(string origin)
-		{
-			return Task.FromResult(true);
 		}
 	}
 }

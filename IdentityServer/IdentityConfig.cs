@@ -68,6 +68,11 @@ namespace IdentityServer
 						"https://localhost:4200/",
 						"https://manuels-angularclient.azurewebsites.net/",
 					},
+					AllowedCorsOrigins = new List<string>
+					{
+						"http://localhost:4200",
+						"https://localhost:4200/",
+					},
 					AllowedScopes = { "openid", "profile", "book.read", "book.write" },
 					AlwaysIncludeUserClaimsInIdToken = true
 				},
