@@ -72,6 +72,7 @@ namespace IdentityServer
 					{
 						"http://localhost:4200",
 						"https://localhost:4200/",
+						"https://manuels-angularclient.azurewebsites.net"
 					},
 					AllowedScopes = { "openid", "profile", "book.read", "book.write" },
 					AlwaysIncludeUserClaimsInIdToken = true
