@@ -8,5 +8,4 @@ import { AuthService } from '../../services/auth.service';
 export class WelcomeComponent {
 
   constructor(public auth: AuthService) { }
-
 }

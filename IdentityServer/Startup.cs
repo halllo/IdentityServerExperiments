@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
@@ -33,7 +34,7 @@ namespace IdentityServer
 				b.AddConsole();
 				b.AddAzureWebAppDiagnostics();
 			});
-			services.AddCors();
+			services.AddCors(options => options.AddPolicy("mycustomcorspolicy", b => b.WithOrigins("http://meinetollewebsite.de").AllowAnyMethod().AllowAnyHeader()));
 			services.AddMvc();
 
 			var serviceProvider = services.BuildServiceProvider();
@@ -46,6 +47,8 @@ namespace IdentityServer
 				.AddTestUsers(IdentityConfig.GetTestUsers())
 				;
 
+			services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
+
 			services.Configure<CookiePolicyOptions>(options =>
 			{
 				options.CheckConsentNeeded = context => { return true; };
@@ -55,11 +58,11 @@ namespace IdentityServer
 
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
 		{
-			app.UseCors(builder => builder.AllowAnyHeader().AllowAnyMethod());
-
 			app.UseDeveloperExceptionPage();
 
 			app.UseIdentityServer();
+
+			app.UseCors("mycustomcorspolicy");
 
 			app.UseDefaultFiles();
 			app.UseStaticFiles(); // Install IdentityServer UI: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/IdentityServer/IdentityServer4.Quickstart.UI/release/get.ps1'))
