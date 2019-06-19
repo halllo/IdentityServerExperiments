@@ -12,6 +12,13 @@
 		<PackageReference Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.2.0" />
 		<PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="4.5.1" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="Fido2NetLib">
+	    <HintPath>..\..\fido2-net-lib\fido2-net-lib\bin\Debug\netcoreapp2.0\Fido2NetLib.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>
