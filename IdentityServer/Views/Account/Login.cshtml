@@ -24,7 +24,7 @@
 							<fieldset>
 								<div class="form-group">
 									<label asp-for="Username"></label>
-									<input class="form-control" placeholder="Username" asp-for="Username" autofocus>
+									<input class="form-control" placeholder="Username" asp-for="Username" id="username-input" autofocus>
 								</div>
 								<div class="form-group">
 									<label asp-for="Password"></label>
@@ -50,7 +50,6 @@
 
 						<div>
 							<p>Passwordless</p>
-							<p><a class="btn btn-success" id="passwordlessRegister">Register</a></p>
 							<p><a class="btn btn-success" id="passwordlessAuthenticate">Authenticate</a></p>
 						</div>
 

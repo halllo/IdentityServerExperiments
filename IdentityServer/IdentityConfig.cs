@@ -1,8 +1,8 @@
-﻿using IdentityServer4.Models;
-using IdentityServer4.Test;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Security.Claims;
+using IdentityServer4.Models;
+using IdentityServer4.Quickstart.UI;
+using IdentityServer4.Test;
 
 namespace IdentityServer
 {
@@ -82,19 +82,7 @@ namespace IdentityServer
 
 		public static List<TestUser> GetTestUsers()
 		{
-			return new List<TestUser>
-			{
-				new TestUser
-				{
-					SubjectId = "123", Username = "bob", Password = "bob",
-					Claims = new List<Claim>
-					{
-						new Claim("name", "Bob Loblaw"),
-						new Claim("email", "Bob@Loblaw.com"),
-						new Claim("location", "USA"),
-					}
-				}
-			};
+			return TestUsers.Users;
 		}
 	}
 }
