@@ -44,13 +44,13 @@ namespace IdentityServer4.Quickstart.UI
 
 
 
-			var MDSAccessKey = config["fido2:MDSAccessKey"];
-			_mds = string.IsNullOrEmpty(MDSAccessKey) ? null : MDSMetadata.Instance(MDSAccessKey, config["fido2:MDSCacheDirPath"]);
-			if (null != _mds)
-			{
-				if (false == _mds.IsInitialized())
-					_mds.Initialize().Wait();
-			}
+			//var MDSAccessKey = config["fido2:MDSAccessKey"];
+			//_mds = string.IsNullOrEmpty(MDSAccessKey) ? null : MDSMetadata.Instance(MDSAccessKey, config["fido2:MDSCacheDirPath"]);
+			//if (null != _mds)
+			//{
+			//	if (false == _mds.IsInitialized())
+			//		_mds.Initialize().Wait();
+			//}
 		}
 
 		/// <summary>

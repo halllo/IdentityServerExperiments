@@ -6,20 +6,14 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Fido2" Version="1.0.0-preview3" />
 		<PackageReference Include="IdentityServer4" Version="2.4.0" />
 		<PackageReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.3" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="2.2.0" />
-		<PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.2.0" />
-		<PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="4.5.1" />
+		<PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.2.5" />
+		<PackageReference Include="Microsoft.IdentityModel.Clients.ActiveDirectory" Version="5.1.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.3" />
-		<PackageReference Include="PeterO.Numbers" Version="1.4.1" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Reference Include="Fido2NetLib">
-	    <HintPath>..\..\fido2-net-lib\fido2-net-lib\bin\Debug\netcoreapp2.0\Fido2NetLib.dll</HintPath>
-	  </Reference>
 	</ItemGroup>
 
 </Project>

@@ -28,13 +28,13 @@ namespace IdentityServer.Quickstart.Account
 
 		public FidoController(IConfiguration config, IIdentityServerInteractionService interaction)
 		{
-			var MDSAccessKey = config["fido2:MDSAccessKey"];
-			_mds = string.IsNullOrEmpty(MDSAccessKey) ? null : MDSMetadata.Instance(MDSAccessKey, config["fido2:MDSCacheDirPath"]);
-			if (null != _mds)
-			{
-				if (false == _mds.IsInitialized())
-					_mds.Initialize().Wait();
-			}
+			//var MDSAccessKey = config["fido2:MDSAccessKey"];
+			//_mds = string.IsNullOrEmpty(MDSAccessKey) ? null : MDSMetadata.Instance(MDSAccessKey, config["fido2:MDSCacheDirPath"]);
+			//if (null != _mds)
+			//{
+			//	if (false == _mds.IsInitialized())
+			//		_mds.Initialize().Wait();
+			//}
 
 
 			_origin = config["fido2:origin"];
