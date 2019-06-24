@@ -38,7 +38,7 @@ namespace IdentityServer.Quickstart.Account
 				Origin = _origin,
 				// Only create and use Metadataservice if we have an acesskey
 				MetadataService = _mds,
-				TimestampDriftTolerance = config.GetValue<int>("fido2:TimestampDriftTolerance")
+				//TimestampDriftTolerance = config.GetValue<int>("fido2:TimestampDriftTolerance")
 			});
 		}
 
@@ -286,12 +286,20 @@ namespace IdentityServer.Quickstart.Account
 		{
 			try
 			{
-				// 1. Get user from DB
-				var user = TestUsers.Users.FirstOrDefault(u => string.Equals(u.Username, username, StringComparison.InvariantCultureIgnoreCase));
-				if (user == null) return BadRequest("Username was not registered");//leaks information about registered users :(
+				IEnumerable<PublicKeyCredentialDescriptor> existingCredentials;
+				if (!string.IsNullOrEmpty(username))
+				{
+					// 1. Get user from DB
+					var user = TestUsers.Users.FirstOrDefault(u => string.Equals(u.Username, username, StringComparison.InvariantCultureIgnoreCase));
+					if (user == null) return BadRequest("Username was not registered");//leaks information about registered users :(
 
-				// 2. Get registered credentials from database
-				IEnumerable<PublicKeyCredentialDescriptor> existingCredentials = TestUsers.FidoCredentials.Where(c => c.UserId.SequenceEqual(Encoding.UTF8.GetBytes(user.Username))).Select(c => c.Descriptor).ToList();
+					// 2. Get registered credentials from database
+					existingCredentials = TestUsers.FidoCredentials.Where(c => c.UserId.SequenceEqual(Encoding.UTF8.GetBytes(user.Username))).Select(c => c.Descriptor).ToList();
+				}
+				else
+				{
+					existingCredentials = Enumerable.Empty<PublicKeyCredentialDescriptor>();
+				}
 
 				// 3. Create options
 				var options = _lib.GetAssertionOptions(
@@ -299,6 +307,7 @@ namespace IdentityServer.Quickstart.Account
 					userVerification: string.IsNullOrEmpty(userVerification) ? UserVerificationRequirement.Discouraged : userVerification.ToEnum<UserVerificationRequirement>(),
 					extensions: new AuthenticationExtensionsClientInputs()
 					{
+						AppID = _origin,
 						SimpleTransactionAuthorization = "FIDO",
 						GenericTransactionAuthorization = new TxAuthGenericArg { ContentType = "text/plain", Content = new byte[] { 0x46, 0x49, 0x44, 0x4F } },
 						UserVerificationIndex = true,
@@ -344,6 +353,10 @@ namespace IdentityServer.Quickstart.Account
 
 				// 2. Get registered credential from database
 				var creds = TestUsers.FidoCredentials.Where(c => c.Descriptor.Id.SequenceEqual(request.RawResponse.Id)).FirstOrDefault();
+				if (creds == null)
+				{
+					return BadRequest("unknown credentials");
+				}
 
 				// 3. Get credential counter from database
 				var storedCounter = creds.SignatureCounter;
@@ -420,122 +433,6 @@ namespace IdentityServer.Quickstart.Account
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		[HttpGet]
-		[Authorize]
-		[Route("/credentials")]
-		public ActionResult Index()
-		{
-			var subjectId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-
-			// 1. Get user from DB
-			var dbUser = TestUsers.Users.FirstOrDefault(u => string.Equals(u.SubjectId, subjectId, StringComparison.InvariantCultureIgnoreCase));
-			if (dbUser == null)
-			{
-				return BadRequest("no such user");
-			}
-
-			// 2. Get registered credentials from database
-			var existingCredentials = TestUsers.FidoCredentials.Where(c => string.Equals(c.SubjectId, subjectId, StringComparison.InvariantCultureIgnoreCase)).Select(c => c).ToList();
-			var resultDtos = new List<FidoCredentialDto>();
-			foreach (var cred in existingCredentials)
-			{
-				var coseKey = PeterO.Cbor.CBORObject.DecodeFromBytes(cred.PublicKey);
-				var kty = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyCommonParameters.kty)].AsInt32();
-				var desc = "";
-				var icon = "";
-				try
-				{
-					var entry = _mds.GetEntry(cred.AaGuid);
-					desc = entry.MetadataStatement.Description.ToString();
-					icon = entry.MetadataStatement.Icon.ToString();
-				}
-				catch { }
-
-				var resultDto = new FidoCredentialDto
-				{
-					AttestationType = cred.CredType,
-					CreateDate = cred.RegDate,
-					Counter = cred.SignatureCounter.ToString(),
-					AAGUID = cred.AaGuid.ToString(),
-					Description = desc,
-				};
-				switch (kty)
-				{
-					case (int)COSE.KeyTypes.OKP:
-						{
-							var X = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyTypeParameters.x)].GetByteString();
-							resultDto.PublicKey = $"X: {BitConverter.ToString(X).Replace("-", "")}";
-							break;
-						}
-					case (int)COSE.KeyTypes.EC2:
-						{
-							var X = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyTypeParameters.x)].GetByteString();
-							var Y = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyTypeParameters.y)].GetByteString();
-							resultDto.PublicKey = $"X: {BitConverter.ToString(X).Replace("-", "")}; Y: {BitConverter.ToString(Y).Replace("-", "")}";
-							break;
-						}
-					case (int)COSE.KeyTypes.RSA:
-						{
-							var modulus = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyTypeParameters.n)].GetByteString();
-							var exponent = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyTypeParameters.e)].GetByteString();
-							resultDto.PublicKey = $"Modulus: {BitConverter.ToString(modulus).Replace("-", "")}; Exponent: {BitConverter.ToString(exponent).Replace("-", "")}";
-							break;
-						}
-					default:
-						{
-							throw new Fido2VerificationException(string.Format("Missing or unknown keytype {0}", kty.ToString()));
-						}
-				}
-
-				resultDtos.Add(resultDto);
-			}
-
-			return Ok(resultDtos);
-		}
-		public class FidoCredentialDto
-		{
-			public string AttestationType { get; set; }
-			public DateTime CreateDate { get; set; }
-			public string Counter { get; set; }
-			public string AAGUID { get; set; }
-			public string Description { get; set; }
-			public string PublicKey { get; set; }
-		}
 
 
 

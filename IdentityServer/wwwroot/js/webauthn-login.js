@@ -1,136 +1,15 @@
 (function () {
 
-	let buttonRegister = document.querySelector('#passwordlessRegister');
-	if (buttonRegister) {
-		buttonRegister.addEventListener('click', async function (event) {
-
-			try {
-				let data = new FormData();
-				data.append('attType', 'direct');
-				data.append('authType', '');
-				data.append('userVerification', 'preferred');
-				data.append('requireResidentKey', false);//only edge supports this right now
-
-				let makeCredentialOptionsResponse = await fetch('/makeCredentialOptions', {
-					method: 'POST',
-					body: data,
-					headers: {
-						'Accept': 'application/json'
-					}
-				});
-
-				if (makeCredentialOptionsResponse.ok) {
-					let makeCredentialOptionsResponseObject = await makeCredentialOptionsResponse.json();
-					let publicKeyCredentialCreationOptions = makeCredentialOptionsResponseObject.options;
-					let sessionId = makeCredentialOptionsResponseObject.sessionId;
-
-					publicKeyCredentialCreationOptions.challenge = coerceToArrayBuffer(publicKeyCredentialCreationOptions.challenge);
-					publicKeyCredentialCreationOptions.user.id = coerceToArrayBuffer(publicKeyCredentialCreationOptions.user.id);
-					publicKeyCredentialCreationOptions.excludeCredentials = publicKeyCredentialCreationOptions.excludeCredentials.map((excludeCredential) => {
-						excludeCredential.id = coerceToArrayBuffer(excludeCredential.id);
-						return excludeCredential;
-					});
-					if (publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment === null) publicKeyCredentialCreationOptions.authenticatorSelection.authenticatorAttachment = undefined;
-
-					const newCredential = await navigator.credentials.create({ publicKey: publicKeyCredentialCreationOptions });
-
-					let attestationObject = new Uint8Array(newCredential.response.attestationObject);
-					let clientDataJSON = new Uint8Array(newCredential.response.clientDataJSON);
-					let rawId = new Uint8Array(newCredential.rawId);
-					const data = {
-						sessionId: sessionId,
-						attestationResponse: {
-							id: newCredential.id,
-							rawId: coerceToBase64Url(rawId),
-							type: newCredential.type,
-							extensions: newCredential.getClientExtensionResults(),
-							response: {
-								AttestationObject: coerceToBase64Url(attestationObject),
-								clientDataJson: coerceToBase64Url(clientDataJSON)
-							}
-						}
-					};
-
-					let makeCredentialResponse = await fetch('/makeCredential', {
-						method: 'POST',
-						body: JSON.stringify(data),
-						headers: {
-							'Accept': 'application/json',
-							'Content-Type': 'application/json'
-						}
-					});
-
-					if (makeCredentialResponse.ok) {
-						let makeCredentialResponseObject = await makeCredentialResponse.json();
-						console.info('registered :)', makeCredentialResponseObject);
-					} else {
-						console.error(makeCredentialResponse.status);
-					}
-				} else {
-					console.error(makeCredentialOptionsResponse.status);
-				}
-			} catch (err) {
-				console.error(err.message || err);
-			}
-
-		}, false);
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	let buttonAuthenticate = document.querySelector('#passwordlessAuthenticate');
 	if (buttonAuthenticate) {
 		buttonAuthenticate.addEventListener('click', async function (event) {
 
 			try {
-				let username = document.querySelector('#username-input').value;
 
 				let data = new FormData();
-				data.append('username', username);
-				data.append('userVerification', 'preferred');
+				//let username = document.querySelector('#username-input').value;
+				//data.append('username', username);
+				//data.append('userVerification', 'preferred');
 
 				let assertionOptionsResponse = await fetch('/assertionOptions', {
 					method: 'POST',
@@ -140,9 +19,9 @@
 					}
 				});
 
-				if (assertionOptionsResponse.ok) {
-					let assertionOptionsResponseObject = await assertionOptionsResponse.json();
-					let makeAssertionOptions = assertionOptionsResponseObject.options;
+				let assertionOptionsResponseObject = await assertionOptionsResponse.json();
+				let makeAssertionOptions = assertionOptionsResponseObject.options;
+				if (makeAssertionOptions && makeAssertionOptions.status === 'ok') {
 					let sessionId = assertionOptionsResponseObject.sessionId;
 
 					const challenge = makeAssertionOptions.challenge.replace(/-/g, '+').replace(/_/g, '/');
@@ -182,15 +61,18 @@
 						}
 					});
 
-					if (makeAssertionResponse.ok) {
+					if (makeAssertionResponse.status !== 400) {
 						let makeAssertionResponseObject = await makeAssertionResponse.json();
-						console.info('authenticated :)', makeAssertionResponseObject);
+						if (makeAssertionResponseObject.status === 'ok') {
+							console.info('authenticated :)', makeAssertionResponseObject);
+						} else {
+							console.error(makeAssertionResponseObject.errorMessage);
+						}
 					} else {
-						console.error(makeAssertionResponse.status);
+						console.error(await makeAssertionResponse.json());
 					}
-
 				} else {
-					console.error(assertionOptionsResponse.status);
+					console.error(assertionOptionsResponseObject);
 				}
 
 			} catch (err) {
