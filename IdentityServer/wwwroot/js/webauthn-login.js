@@ -37,6 +37,10 @@
 					let clientDataJSON = new Uint8Array(assertedCredential.response.clientDataJSON);
 					let rawId = new Uint8Array(assertedCredential.rawId);
 					let sig = new Uint8Array(assertedCredential.response.signature);
+
+					let login_returnUrl = document.querySelector('#ReturnUrl').value;
+					let login_rememberLogin = document.querySelector('#RememberLogin').value;
+
 					const data = {
 						sessionId: sessionId,
 						rawResponse: {
@@ -49,7 +53,9 @@
 								clientDataJson: coerceToBase64Url(clientDataJSON),
 								signature: coerceToBase64Url(sig)
 							}
-						}
+						},
+						returnUrl: login_returnUrl,
+						rememberLogin: login_rememberLogin
 					};
 
 					let makeAssertionResponse = await fetch('/makeAssertion', {
@@ -64,7 +70,12 @@
 					if (makeAssertionResponse.status !== 400) {
 						let makeAssertionResponseObject = await makeAssertionResponse.json();
 						if (makeAssertionResponseObject.status === 'ok') {
-							console.info('authenticated :)', makeAssertionResponseObject);
+							let redirectUri = makeAssertionResponseObject.returnUrl;
+							if (redirectUri === '~/') {
+								redirectUri = location.origin;
+							}
+							console.info('authenticated :) redirect to ' + redirectUri, makeAssertionResponseObject);
+							location.assign(redirectUri);
 						} else {
 							console.error(makeAssertionResponseObject.errorMessage);
 						}

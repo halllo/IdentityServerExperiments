@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using IdentityServer4.Quickstart.UI;
+using IdentityServer4.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using static Fido2NetLib.Fido2;
@@ -17,11 +20,13 @@ namespace IdentityServer.Quickstart.Account
 	[ApiController]
 	public class FidoController : ControllerBase
 	{
+		private readonly IIdentityServerInteractionService _interaction;
+
 		private Fido2 _lib;
 		private IMetadataService _mds;
 		private string _origin;
 
-		public FidoController(IConfiguration config)
+		public FidoController(IConfiguration config, IIdentityServerInteractionService interaction)
 		{
 			var MDSAccessKey = config["fido2:MDSAccessKey"];
 			_mds = string.IsNullOrEmpty(MDSAccessKey) ? null : MDSMetadata.Instance(MDSAccessKey, config["fido2:MDSCacheDirPath"]);
@@ -30,7 +35,11 @@ namespace IdentityServer.Quickstart.Account
 				if (false == _mds.IsInitialized())
 					_mds.Initialize().Wait();
 			}
+
+
 			_origin = config["fido2:origin"];
+
+
 			_lib = new Fido2(new Fido2.Configuration
 			{
 				ServerDomain = config["fido2:serverDomain"],
@@ -40,6 +49,9 @@ namespace IdentityServer.Quickstart.Account
 				MetadataService = _mds,
 				//TimestampDriftTolerance = config.GetValue<int>("fido2:TimestampDriftTolerance")
 			});
+
+
+			_interaction = interaction;
 		}
 
 
@@ -380,7 +392,48 @@ namespace IdentityServer.Quickstart.Account
 				TestUsers.FidoCredentials.Where(c => c.Descriptor.Id.SequenceEqual(res.CredentialId)).FirstOrDefault().SignatureCounter = res.Counter;
 
 				// 7. return OK to client
-				return Ok(res);
+				if (string.Equals(res.Status, "ok", StringComparison.InvariantCultureIgnoreCase))
+				{
+					//return Ok(res);
+					//actually loging the user in
+					var context = await _interaction.GetAuthorizationContextAsync(request.ReturnUrl);
+					var dbUser = TestUsers.Users.FirstOrDefault(u => string.Equals(u.SubjectId, creds.SubjectId, StringComparison.InvariantCultureIgnoreCase));
+					AuthenticationProperties props = null;
+					if (AccountOptions.AllowRememberLogin && request.RememberLogin)
+					{
+						props = new AuthenticationProperties
+						{
+							IsPersistent = true,
+							ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
+						};
+					};
+					await HttpContext.SignInAsync(dbUser.SubjectId, dbUser.Username, props);
+
+					if (context != null)
+					{
+						// we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
+						return Ok(new MakeAssertionResponse { Status = "ok", Response = res, ReturnUrl = request.ReturnUrl });
+					}
+
+					// request for a local page
+					if (Url.IsLocalUrl(request.ReturnUrl))
+					{
+						return Ok(new MakeAssertionResponse { Status = "ok", Response = res, ReturnUrl = request.ReturnUrl });
+					}
+					else if (string.IsNullOrEmpty(request.ReturnUrl))
+					{
+						return Ok(new MakeAssertionResponse { Status = "ok", Response = res, ReturnUrl = "~/" });
+					}
+					else
+					{
+						// user might have clicked on a malicious link - should be logged
+						throw new Exception("invalid return URL");
+					}
+				}
+				else
+				{
+					return BadRequest("not ok");
+				}
 			}
 			catch (Exception e)
 			{
@@ -391,6 +444,14 @@ namespace IdentityServer.Quickstart.Account
 		{
 			public string SessionId { get; set; }
 			public AuthenticatorAssertionRawResponse RawResponse { get; set; }
+			public string ReturnUrl { get; set; }
+			public bool RememberLogin { get; set; }
+		}
+		public class MakeAssertionResponse
+		{
+			public string Status { get; set; }
+			public Fido2ResponseBase Response { get; set; }
+			public string ReturnUrl { get; set; }
 		}
 
 

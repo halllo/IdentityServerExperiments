@@ -18,13 +18,13 @@
 					</div>
 					<div class="panel-body">
 
-						<form asp-route="Login">
+						<form asp-route="Login" id="login-form">
 							<input type="hidden" asp-for="ReturnUrl" />
 
 							<fieldset>
 								<div class="form-group">
 									<label asp-for="Username"></label>
-									<input class="form-control" placeholder="Username" asp-for="Username" id="username-input" autofocus>
+									<input class="form-control" placeholder="Username" asp-for="Username" autofocus>
 								</div>
 								<div class="form-group">
 									<label asp-for="Password"></label>
@@ -43,6 +43,7 @@
 									<button class="btn btn-primary" name="button" value="login">Login</button>
 									<button class="btn btn-default" name="button" value="cancel">Cancel</button>
 								</div>
+								@*<input type="hidden" id="fido-input" name="button" value="abc123">*@
 							</fieldset>
 						</form>
 
