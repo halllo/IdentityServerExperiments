@@ -24,9 +24,6 @@ namespace IdentityServer
 			return Host.CreateDefaultBuilder(args)
 					.ConfigureLogging(logging =>
 					{
-						logging.AddConfiguration(builtConfig.GetSection("Logging"));
-						logging.AddDebug();
-						logging.AddConsole();
 						logging.AddAzureWebAppDiagnostics();
 					})
 					.ConfigureAppConfiguration((context, configBuilder) =>
