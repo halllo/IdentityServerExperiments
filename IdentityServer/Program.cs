@@ -14,6 +14,10 @@ namespace IdentityServer
 
 		public static IHostBuilder CreateHostBuilder(string[] args) =>
 			Host.CreateDefaultBuilder(args)
+				.ConfigureAppConfiguration((context, configBuilder) =>
+				{
+					configBuilder.AddAzureKeyVault();
+				})
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
 					webBuilder.UseStartup<Startup>();
