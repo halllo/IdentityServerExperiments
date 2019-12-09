@@ -4,6 +4,7 @@ import { P404Component } from './views/404/404.component';
 import { RedirectingComponent } from './views/redirecting/redirecting.component';
 import { FullLayoutComponent, SimpleLayoutComponent } from './container';
 import { NotAuthenticatedGuard, AuthenticatedGuard } from './services/auth-guard.service';
+import { P403Component } from './views/403/403.component';
 
 
 export const routes: Routes = [
@@ -11,17 +12,18 @@ export const routes: Routes = [
   { path: 'loggedin', redirectTo: 'dashboard', pathMatch: 'full' },
   {
     path: 'welcome',
-    loadChildren: './views/welcome/welcome.module#WelcomeModule',
+    loadChildren: () => import('./views/welcome/welcome.module').then(m => m.WelcomeModule),
     canActivate: [ NotAuthenticatedGuard ]
   },
   {
     path: '',
     component: FullLayoutComponent,
     canActivate: [ AuthenticatedGuard ],
+    data: { requireScope: 'openid' },
     children: [
       {
         path: 'dashboard',
-        loadChildren: './views/dashboard/dashboard.module#DashboardModule',
+        loadChildren: () => import('./views/dashboard/dashboard.module').then(m => m.DashboardModule),
       }
     ]
   },
@@ -32,6 +34,10 @@ export const routes: Routes = [
   {
     path: '404',
     component: P404Component
+  },
+  {
+    path: '403',
+    component: P403Component
   },
   {
     path: '**',

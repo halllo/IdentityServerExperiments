@@ -21,13 +21,6 @@ namespace IdentityServer
 
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddLogging(b =>
-			{
-				b.AddConfiguration(config.GetSection("Logging"));
-				b.AddDebug();
-				b.AddConsole();
-				b.AddAzureWebAppDiagnostics();
-			});
 			services.AddCors(options => options.AddPolicy("mycustomcorspolicy", b => b.WithOrigins("http://meinetollewebsite.de").AllowAnyMethod().AllowAnyHeader()));
 			services.AddMvc();
 
@@ -55,10 +48,10 @@ namespace IdentityServer
 			app.UseDeveloperExceptionPage();
 
 			app.UseStaticFiles(); // Install IdentityServer UI: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/IdentityServer/IdentityServer4.Quickstart.UI/release/get.ps1'))
-			app.UseCors("mycustomcorspolicy");
 			app.UseCookiePolicy();
 			app.UseRouting();
 			app.UseIdentityServer();
+			app.UseCors("mycustomcorspolicy");//always after UseIdentityServer
 			app.UseAuthorization();
 			app.UseEndpoints(endpoints =>
 			{

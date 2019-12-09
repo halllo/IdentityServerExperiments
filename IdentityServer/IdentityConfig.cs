@@ -50,9 +50,11 @@ namespace IdentityServer
 				{
 					ClientId = "angularclient",
 					ClientName = "Angular Client",
-					AllowedGrantTypes = GrantTypes.Implicit,
-					AccessTokenLifetime = (int)TimeSpan.FromMinutes(5).TotalSeconds,
+					AllowedGrantTypes = GrantTypes.Code,
+					AccessTokenLifetime = (int)TimeSpan.FromMinutes(2).TotalSeconds,
 					AllowAccessTokensViaBrowser = true,
+					RequirePkce = true,
+					RequireClientSecret = false,
 					RedirectUris = new List<string>
 					{
 						"http://localhost:4200/",
@@ -71,7 +73,7 @@ namespace IdentityServer
 					AllowedCorsOrigins = new List<string>
 					{
 						"http://localhost:4200",
-						"https://localhost:4200/",
+						"https://localhost:4200",
 						"https://manuels-angularclient.azurewebsites.net"
 					},
 					AllowedScopes = { "openid", "profile", "book.read", "book.write" },

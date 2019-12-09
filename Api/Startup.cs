@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -29,7 +30,7 @@ namespace Api
 					options.RequireHttpsMetadata = false;
 					options.ApiName = Configuration["Audience"];
 				});
-
+			services.AddTransient<JwtBearerHandler, JwtBearerHandlerWithRetryWhenConfigurationCannotBeOptained>();
 			services.AddAuthorization(options =>
 			{
 				options.AddPolicy("book.read", policy =>

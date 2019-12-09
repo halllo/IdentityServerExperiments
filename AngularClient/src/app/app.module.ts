@@ -13,6 +13,7 @@ import { AuthenticatedGuard, NotAuthenticatedGuard } from './services/auth-guard
 import { Api } from './services/api.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { P403Component } from './views/403/403.component';
 
 
 @NgModule({
@@ -23,13 +24,14 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     ReactiveFormsModule,
     HttpClientModule,
     AppRoutingModule,
-    NgbModule.forRoot(),
+    NgbModule,
   ],
   declarations: [
     AppComponent,
     SimpleLayoutComponent,
     FullLayoutComponent,
     P404Component,
+    P403Component,
     RedirectingComponent,
   ],
   providers: [

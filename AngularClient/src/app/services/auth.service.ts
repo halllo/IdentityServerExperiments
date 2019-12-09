@@ -33,7 +33,7 @@ export class AuthService {
       redirect_uri: this.runtimeConfig.basePath,
       post_logout_redirect_uri: this.runtimeConfig.basePath,
 
-      response_type: 'id_token token',
+      response_type: 'code',
       scope: environment.oidc.scope,
 
       silent_redirect_uri: this.runtimeConfig.basePath + 'assets/pages/silent-token-refresh.html',
@@ -50,7 +50,8 @@ export class AuthService {
 
     if (
       window.location.hash.indexOf('id_token') > -1 ||
-      window.location.hash.indexOf('access_token') > -1
+      window.location.hash.indexOf('access_token') > -1 ||
+      window.location.search.startsWith('?code=')
     ) {
       this.completeLogin();
     } else {
@@ -82,9 +83,9 @@ export class AuthService {
       }
     });
 
-    this.mgr.events.addUserUnloaded(e => {
+    this.mgr.events.addUserUnloaded(() => {
       /*if (!environment.production)*/ {
-        console.log('authService: user unloaded', e);
+        console.log('authService: user unloaded');
       }
       this.loggedIn.next(false);
     });
@@ -96,15 +97,15 @@ export class AuthService {
       this.loggedIn.next(false);
     });
 
-    this.mgr.events.addUserSessionChanged(e => {
+    this.mgr.events.addUserSessionChanged(() => {
       /*if (!environment.production)*/ {
-        console.log('authService: user session changed', e);
+        console.log('authService: user session changed');
       }
     });
 
-    this.mgr.events.addUserSignedOut(e => {
+    this.mgr.events.addUserSignedOut(() => {
       /*if (!environment.production)*/ {
-        console.log('authService: user signed out', e);
+        console.log('authService: user signed out');
       }
       this.mgr.removeUser();
     });
@@ -186,6 +187,10 @@ export class AuthService {
     return this.currentUser.profile.sub;
   }
 
+  public get profile(): any {
+    return this.currentUser.profile;
+  }
+
   public get idToken(): string {
     return this.currentUser.id_token;
   }
@@ -199,6 +204,6 @@ export class AuthService {
   }
 
   public hasScope(scope: string): boolean {
-    return !scope || this.scopes.includes(scope);
+    return scope && this.scopes.includes(scope);
   }
 }
