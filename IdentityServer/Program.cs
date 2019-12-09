@@ -16,11 +16,6 @@ namespace IdentityServer
 
 		public static IHostBuilder CreateHostBuilder(string[] args)
 		{
-			var builtConfig = new ConfigurationBuilder()
-				.AddJsonFile("appsettings.json")
-				.AddCommandLine(args)
-				.Build();
-
 			return Host.CreateDefaultBuilder(args)
 					.ConfigureLogging(logging =>
 					{
