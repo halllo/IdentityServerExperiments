@@ -40,13 +40,13 @@ namespace IdentityServer.Quickstart.Account
 			_origin = config["fido2:origin"];
 
 
-			_lib = new Fido2(new Fido2.Configuration
+			_lib = new Fido2(new Fido2Configuration
 			{
 				ServerDomain = config["fido2:serverDomain"],
 				ServerName = "Fido2 test",
 				Origin = _origin,
 				// Only create and use Metadataservice if we have an acesskey
-				MetadataService = _mds,
+				//MetadataService = _mds,
 				//TimestampDriftTolerance = config.GetValue<int>("fido2:TimestampDriftTolerance")
 			});
 
@@ -133,7 +133,7 @@ namespace IdentityServer.Quickstart.Account
 				{
 					return BadRequest("no such user");
 				}
-				var user = new Fido2NetLib.User
+				var user = new Fido2User
 				{
 					DisplayName = dbUser.Username,
 					Name = dbUser.Username,
@@ -164,7 +164,7 @@ namespace IdentityServer.Quickstart.Account
 					});
 
 				// 4. Temporarily store options, session/in-memory cache/redis/db
-				var sessionId = IdentityModel.CryptoRandom.CreateRandomKeyString(64);
+				var sessionId = Convert.ToBase64String(IdentityModel.CryptoRandom.CreateRandomKey(64));
 				TestUsers.FidoAttestationOptions[sessionId] = options.ToJson();
 
 				// 5. return options to client
@@ -329,7 +329,7 @@ namespace IdentityServer.Quickstart.Account
 				);
 
 				// 4. Temporarily store options, session/in-memory cache/redis/db
-				var sessionId = IdentityModel.CryptoRandom.CreateRandomKeyString(64);
+				var sessionId = Convert.ToBase64String(IdentityModel.CryptoRandom.CreateRandomKey(64));
 				TestUsers.FidoAttestationOptions[sessionId] = options.ToJson();
 
 				// 5. Return options to client

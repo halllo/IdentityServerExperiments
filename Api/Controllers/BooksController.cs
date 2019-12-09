@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Linq;
 
 namespace Api.Controllers
 {
@@ -19,6 +19,16 @@ namespace Api.Controllers
 		public IActionResult Post()
 		{
 			return new JsonResult(from c in User.Claims select new { c.Type, c.Value });
+		}
+
+
+
+		[HttpGet]
+		[Route("help")]
+		[AllowAnonymous]
+		public IActionResult GetHelp()
+		{
+			return Ok("ok");
 		}
 	}
 }

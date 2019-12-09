@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace Api
 {
@@ -18,8 +19,9 @@ namespace Api
 
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddMvc();
-
+			services.AddControllers();
+			//services.AddRazorPages();
+			services.AddCors();
 			services.AddAuthentication("Bearer")
 				.AddIdentityServerAuthentication(options =>
 				{
@@ -48,10 +50,9 @@ namespace Api
 			services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
 		}
 
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()
-			);
+			app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
 
 			if (env.IsDevelopment())
 			{
@@ -59,11 +60,15 @@ namespace Api
 			}
 
 			app.UseAuthentication();
-			app.UseMvc();
-
-			app.Run(async (context) =>
+			app.UseRouting();
+			app.UseAuthorization();
+			app.UseEndpoints(endpoints =>
 			{
-				await context.Response.WriteAsync("This is just an API!");
+				endpoints.MapControllers();
+				endpoints.MapGet("/", async context =>
+				{
+					await context.Response.WriteAsync("This is just an API!");
+				});
 			});
 		}
 	}

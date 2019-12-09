@@ -3,15 +3,16 @@
 
 // Inlined for Debugging. Taken from https://github.com/IdentityServer/IdentityServer4/blob/44651bea9b02c992902639b21205f433aad47d03/src/IdentityServer4/src/Hosting/CorsPolicyProvider.cs
 
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
 using IdentityServer4.Configuration;
+using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IdentityServer
 {

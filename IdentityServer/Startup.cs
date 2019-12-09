@@ -10,26 +10,20 @@ namespace IdentityServer
 {
 	public class Startup
 	{
-		public Startup(IHostingEnvironment env)
+		private readonly IWebHostEnvironment env;
+		private readonly IConfiguration config;
+
+		public Startup(IWebHostEnvironment env, IConfiguration config)
 		{
-			var builder = new ConfigurationBuilder()
-				.SetBasePath(env.ContentRootPath)
-				.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
-				.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-				.AddEnvironmentVariables()
-				.AddAzureKeyVault()
-				;
-
-			Configuration = builder.Build();
+			this.env = env;
+			this.config = config;
 		}
-
-		private IConfiguration Configuration { get; }
 
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddLogging(b =>
 			{
-				b.AddConfiguration(Configuration.GetSection("Logging"));
+				b.AddConfiguration(config.GetSection("Logging"));
 				b.AddDebug();
 				b.AddConsole();
 				b.AddAzureWebAppDiagnostics();
@@ -40,7 +34,7 @@ namespace IdentityServer
 			var serviceProvider = services.BuildServiceProvider();
 
 			services.AddIdentityServer()
-				.AddSigningCredentialFromKeyVault(Configuration, serviceProvider.GetService<ILogger<Startup>>())
+				.AddSigningCredentialFromKeyVault(config, serviceProvider.GetService<ILogger<Startup>>())
 				.AddInMemoryIdentityResources(IdentityConfig.GetIdentityResources())
 				.AddInMemoryApiResources(IdentityConfig.GetApis())
 				.AddInMemoryClients(IdentityConfig.GetClients())
@@ -56,19 +50,20 @@ namespace IdentityServer
 			});
 		}
 
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+		public void Configure(IApplicationBuilder app)
 		{
 			app.UseDeveloperExceptionPage();
 
-			app.UseIdentityServer();
-
-			app.UseCors("mycustomcorspolicy");
-
-			app.UseDefaultFiles();
 			app.UseStaticFiles(); // Install IdentityServer UI: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/IdentityServer/IdentityServer4.Quickstart.UI/release/get.ps1'))
-
+			app.UseCors("mycustomcorspolicy");
 			app.UseCookiePolicy();
-			app.UseMvcWithDefaultRoute();
+			app.UseRouting();
+			app.UseIdentityServer();
+			app.UseAuthorization();
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapDefaultControllerRoute();
+			});
 		}
 	}
 }

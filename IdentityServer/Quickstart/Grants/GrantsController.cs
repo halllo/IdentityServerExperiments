@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Fido2NetLib;
-using Fido2NetLib.Objects;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Services;
@@ -131,8 +130,6 @@ namespace IdentityServer4.Quickstart.UI
 			var resultDtos = new List<FidoCredentialDto>();
 			foreach (var cred in existingCredentials)
 			{
-				var coseKey = PeterO.Cbor.CBORObject.DecodeFromBytes(cred.PublicKey);
-				var kty = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyCommonParameters.kty)].AsInt32();
 				var desc = "";
 				var icon = "";
 				try
@@ -150,34 +147,8 @@ namespace IdentityServer4.Quickstart.UI
 					Counter = cred.SignatureCounter.ToString(),
 					AAGUID = cred.AaGuid.ToString(),
 					Description = desc,
+					PublicKey = Convert.ToBase64String(cred.PublicKey)
 				};
-				switch (kty)
-				{
-					case (int)COSE.KeyTypes.OKP:
-						{
-							var X = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyTypeParameters.x)].GetByteString();
-							resultDto.PublicKey = $"X: {BitConverter.ToString(X).Replace("-", "")}";
-							break;
-						}
-					case (int)COSE.KeyTypes.EC2:
-						{
-							var X = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyTypeParameters.x)].GetByteString();
-							var Y = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyTypeParameters.y)].GetByteString();
-							resultDto.PublicKey = $"X: {BitConverter.ToString(X).Replace("-", "")}; Y: {BitConverter.ToString(Y).Replace("-", "")}";
-							break;
-						}
-					case (int)COSE.KeyTypes.RSA:
-						{
-							var modulus = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyTypeParameters.n)].GetByteString();
-							var exponent = coseKey[PeterO.Cbor.CBORObject.FromObject(COSE.KeyTypeParameters.e)].GetByteString();
-							resultDto.PublicKey = $"Modulus: {BitConverter.ToString(modulus).Replace("-", "")}; Exponent: {BitConverter.ToString(exponent).Replace("-", "")}";
-							break;
-						}
-					default:
-						{
-							throw new Exception(string.Format("Missing or unknown keytype {0}", kty.ToString()));
-						}
-				}
 
 				resultDtos.Add(resultDto);
 			}
