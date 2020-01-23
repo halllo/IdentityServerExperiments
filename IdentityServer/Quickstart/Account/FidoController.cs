@@ -168,7 +168,7 @@ namespace IdentityServer.Quickstart.Account
 				TestUsers.FidoAttestationOptions[sessionId] = options.ToJson();
 
 				// 5. return options to client
-				return Ok(new MakeCredentialOptionsResponse
+				return this.NewtonsoftJsonResult(new MakeCredentialOptionsResponse
 				{
 					SessionId = sessionId,
 					Options = options,
@@ -190,7 +190,7 @@ namespace IdentityServer.Quickstart.Account
 		[HttpPost]
 		[Authorize]
 		[Route("/makeCredential")]
-		public async Task<ActionResult> MakeCredential([FromBody] MakeCredentialRequest request)
+		public async Task<ActionResult> MakeCredential([ModelBinder(typeof(NewtonsoftJsonAdapter.Binder))] MakeCredentialRequest request)
 		{
 			var subjectId = User.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
 			try
@@ -333,7 +333,7 @@ namespace IdentityServer.Quickstart.Account
 				TestUsers.FidoAttestationOptions[sessionId] = options.ToJson();
 
 				// 5. Return options to client
-				return Ok(new AssertionOptionsPostResponse
+				return this.NewtonsoftJsonResult(new AssertionOptionsPostResponse
 				{
 					SessionId = sessionId,
 					Options = options,
@@ -355,7 +355,7 @@ namespace IdentityServer.Quickstart.Account
 
 		[HttpPost]
 		[Route("/makeAssertion")]
-		public async Task<ActionResult> MakeAssertion([FromBody] MakeAssertionRequest request)
+		public async Task<ActionResult> MakeAssertion([ModelBinder(typeof(NewtonsoftJsonAdapter.Binder))] MakeAssertionRequest request)
 		{
 			try
 			{
@@ -394,7 +394,6 @@ namespace IdentityServer.Quickstart.Account
 				// 7. return OK to client
 				if (string.Equals(res.Status, "ok", StringComparison.InvariantCultureIgnoreCase))
 				{
-					//return Ok(res);
 					//actually loging the user in
 					var context = await _interaction.GetAuthorizationContextAsync(request.ReturnUrl);
 					var dbUser = TestUsers.Users.FirstOrDefault(u => string.Equals(u.SubjectId, creds.SubjectId, StringComparison.InvariantCultureIgnoreCase));
@@ -412,17 +411,17 @@ namespace IdentityServer.Quickstart.Account
 					if (context != null)
 					{
 						// we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-						return Ok(new MakeAssertionResponse { Status = "ok", Response = res, ReturnUrl = request.ReturnUrl });
+						return this.NewtonsoftJsonResult(new MakeAssertionResponse { Status = "ok", Response = res, ReturnUrl = request.ReturnUrl });
 					}
 
 					// request for a local page
 					if (Url.IsLocalUrl(request.ReturnUrl))
 					{
-						return Ok(new MakeAssertionResponse { Status = "ok", Response = res, ReturnUrl = request.ReturnUrl });
+						return this.NewtonsoftJsonResult(new MakeAssertionResponse { Status = "ok", Response = res, ReturnUrl = request.ReturnUrl });
 					}
 					else if (string.IsNullOrEmpty(request.ReturnUrl))
 					{
-						return Ok(new MakeAssertionResponse { Status = "ok", Response = res, ReturnUrl = "~/" });
+						return this.NewtonsoftJsonResult(new MakeAssertionResponse { Status = "ok", Response = res, ReturnUrl = "~/" });
 					}
 					else
 					{
