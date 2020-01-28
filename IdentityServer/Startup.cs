@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using IdentityServer4;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -33,6 +34,16 @@ namespace IdentityServer
 				.AddInMemoryClients(IdentityConfig.GetClients())
 				.AddTestUsers(IdentityConfig.GetTestUsers())
 				;
+
+			services.AddAuthentication()
+				.AddMicrosoftAccount("Microsoft", options =>
+				{
+					options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+					options.ClientId = config["MicrosoftAccountClientId"];
+					options.ClientSecret = config["MicrosoftAccountClientSecret"];
+					options.AuthorizationEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/authorize";
+					options.TokenEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/token";
+				});
 
 			services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
 

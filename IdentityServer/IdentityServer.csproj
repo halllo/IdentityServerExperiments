@@ -8,6 +8,7 @@
 	<ItemGroup>
 		<PackageReference Include="Fido2" Version="1.0.1" />
 		<PackageReference Include="IdentityServer4" Version="3.1.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="3.1.1" />
 		<PackageReference Include="Microsoft.Azure.KeyVault" Version="3.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.AzureKeyVault" Version="3.1.1" />
 		<PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="3.1.1" />
