@@ -1,4 +1,5 @@
 ﻿using System;
+using IdentityServer.MultiTenancy;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -17,6 +18,7 @@ namespace IdentityServer
 		public static IHostBuilder CreateHostBuilder(string[] args)
 		{
 			return Host.CreateDefaultBuilder(args)
+					.UseServiceProviderFactory(new MultiTenantServiceProviderFactory<Tenant>(Startup.ConfigureMultiTenantServices))
 					.ConfigureLogging(logging =>
 					{
 						logging.AddAzureWebAppDiagnostics();

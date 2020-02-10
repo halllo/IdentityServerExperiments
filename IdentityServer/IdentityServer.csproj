@@ -6,6 +6,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Autofac" Version="5.0.0" />
+		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
 		<PackageReference Include="Fido2" Version="1.0.1" />
 		<PackageReference Include="IdentityServer4" Version="3.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="3.1.1" />

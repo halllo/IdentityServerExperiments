@@ -1,3 +1,4 @@
+@using IdentityServer.MultiTenancy;
 @{
 	var version = typeof(IdentityServer4.Hosting.IdentityServerMiddleware).Assembly.GetName().Version.ToString();
 }
@@ -24,6 +25,11 @@
 		<div class="col-sm-8">
 			<p>
 				Click <a href="~/grants">here</a> to manage your stored grants.
+			</p>
+		</div>
+		<div class="col-sm-8">
+			<p>
+				Tenant ID: @(Context.GetTenant()?.Id ?? "<no tenant>")
 			</p>
 		</div>
 	</div>
