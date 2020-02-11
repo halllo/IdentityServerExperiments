@@ -1,8 +1,4 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace IdentityServer.MultiTenancy
 {
@@ -18,9 +14,9 @@ namespace IdentityServer.MultiTenancy
 			=> builder.UseMiddleware<TenantMiddleware<Tenant>>();
 
 		public static IApplicationBuilder UseMultiTenantContainer<T>(this IApplicationBuilder builder) where T : Tenant
-		   => builder.UseMiddleware<MultitenantContainerMiddleware<T>>();
+		   => builder.UseMiddleware<MultiTenantContainerMiddleware<T>>();
 
 		public static IApplicationBuilder UseMultiTenantContainer(this IApplicationBuilder builder)
-			=> builder.UseMiddleware<MultitenantContainerMiddleware<Tenant>>();
+			=> builder.UseMiddleware<MultiTenantContainerMiddleware<Tenant>>();
 	}
 }

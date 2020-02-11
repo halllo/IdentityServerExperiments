@@ -13,6 +13,7 @@ namespace IdentityServer.MultiTenancy
 
 		public TenantBuilder(IServiceCollection services)
 		{
+			services.AddTransient<ITenantAccessor<T>, TenantAccessor<T>>();
 			services.AddTransient<TenantAccessService<T>>();
 			_services = services;
 		}

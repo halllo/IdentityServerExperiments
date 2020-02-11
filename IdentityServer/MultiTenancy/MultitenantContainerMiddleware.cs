@@ -1,17 +1,15 @@
 ﻿using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace IdentityServer.MultiTenancy
 {
-	internal class MultitenantContainerMiddleware<T> where T : Tenant
+	internal class MultiTenantContainerMiddleware<T> where T : Tenant
 	{
 		private readonly RequestDelegate next;
 
-		public MultitenantContainerMiddleware(RequestDelegate next)
+		public MultiTenantContainerMiddleware(RequestDelegate next)
 		{
 			this.next = next;
 		}

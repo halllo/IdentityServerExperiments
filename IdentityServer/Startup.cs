@@ -1,6 +1,5 @@
 ﻿using Autofac;
 using IdentityServer.MultiTenancy;
-using IdentityServer4;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
@@ -49,20 +48,22 @@ namespace IdentityServer
 
 			services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
 
-			services.Configure<CookiePolicyOptions>(options =>
-			{
-				options.CheckConsentNeeded = context => { return true; };
-				options.MinimumSameSitePolicy = SameSiteMode.None;
-			});
-
 			services.AddMultiTenancy()
 				.WithResolutionStrategy<HostResolutionStrategy>()
-				.WithStore<InMemoryTenantStore>(ServiceLifetime.Singleton);
+				.WithStore<InMemoryTenantStore>(ServiceLifetime.Singleton)
+				;
 		}
 
 		public static void ConfigureMultiTenantServices(Tenant t, ContainerBuilder c)
 		{
 			c.RegisterInstance(new OperationIdService()).SingleInstance();
+
+			c.RegisterTenantOptions<CookiePolicyOptions, Tenant>((options, tenant) =>
+			{
+				options.ConsentCookie.Name = tenant.Id + "-consent";
+				options.CheckConsentNeeded = context => { return true; };
+				options.MinimumSameSitePolicy = SameSiteMode.None;
+			});
 		}
 
 		public void Configure(IApplicationBuilder app)
@@ -72,7 +73,9 @@ namespace IdentityServer
 			app.UseMultiTenancy().UseMultiTenantContainer();
 
 			app.UseStaticFiles(); // Install IdentityServer UI: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/IdentityServer/IdentityServer4.Quickstart.UI/release/get.ps1'))
-			app.UseCookiePolicy();
+
+			app.UseMiddleware<MultiTenantCookiePolicyMiddleware>();
+
 			app.UseRouting();
 			app.UseIdentityServer();
 			app.UseCors("mycustomcorspolicy");//always after UseIdentityServer
