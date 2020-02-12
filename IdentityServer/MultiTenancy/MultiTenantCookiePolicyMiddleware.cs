@@ -9,21 +9,21 @@ namespace IdentityServer.MultiTenancy
 {
 	public class MultiTenantCookiePolicyMiddleware
 	{
-		CookiePolicyMiddleware inner;
+		private readonly RequestDelegate next;
 
-		public MultiTenantCookiePolicyMiddleware(RequestDelegate next, IOptions<CookiePolicyOptions> options)
+		public MultiTenantCookiePolicyMiddleware(RequestDelegate next)
 		{
-			inner = new CookiePolicyMiddleware(next, options);
+			this.next = next;
 		}
 
 		public Task Invoke(HttpContext context)
 		{
 			/* Middlewares requiring IOptions in the constructor cannot be tenant specific!
 			** Because  middleware constructors are invoked on application startup, before any tenant information is available, 
-			** those middlewares have to be wrapped and the options need to be taken from the request instead.
+			** those middlewares have to be wrapped and the options need to be taken from the request context instead.
 			*/
 			var options = context.RequestServices.GetRequiredService<IOptions<CookiePolicyOptions>>();
-			inner.Options = options.Value;
+			var inner = new CookiePolicyMiddleware(next, options);
 			return inner.Invoke(context);
 		}
 	}
