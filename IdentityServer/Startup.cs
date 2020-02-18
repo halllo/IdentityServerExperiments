@@ -1,8 +1,11 @@
 ﻿using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using IdentityServer4;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -36,7 +39,7 @@ namespace IdentityServer
 				.AddTestUsers(IdentityConfig.GetTestUsers())
 				;
 
-			//services.AddAuthentication()
+			services.AddAuthentication();
 			//	.AddMicrosoftAccount("Microsoft", options =>
 			//	{
 			//		options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
@@ -54,16 +57,37 @@ namespace IdentityServer
 				;
 		}
 
-		public static void ConfigureMultiTenantServices(Tenant t, ContainerBuilder c)
+		public static void ConfigureMultiTenantServices(Tenant t, ContainerBuilder c, IComponentContext applicationContainer)
 		{
-			c.RegisterInstance(new TemporaryTenantGuidService()).SingleInstance();
-
 			c.RegisterTenantOptions<CookiePolicyOptions, Tenant>((options, tenant) =>
 			{
 				options.ConsentCookie.Name = options.ConsentCookie.Name + "-" + tenant.Id;
 				options.CheckConsentNeeded = context => { return true; };
 				options.MinimumSameSitePolicy = SameSiteMode.None;
 			});
+
+			c.RegisterType<TemporaryTenantGuidService>().SingleInstance();
+
+
+
+			var services = new ServiceCollection();
+
+
+			var config = applicationContainer.Resolve<IConfiguration>();
+			services.AddAuthentication()
+				.AddMicrosoftAccount("Microsoft", options =>
+				{
+					options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+					options.ClientId = config["MicrosoftAccountClientId"];
+					options.ClientSecret = config["MicrosoftAccountClientSecret"];
+					options.AuthorizationEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/authorize";
+					options.TokenEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/token";
+				});
+
+			c.Populate(services);
+
+
+
 		}
 
 		public void Configure(IApplicationBuilder app)
@@ -76,10 +100,26 @@ namespace IdentityServer
 
 			app.UseMiddleware<MultiTenantCookiePolicyMiddleware>();
 
-			app.UseRouting();
+			app.Use(async (context, next) =>
+			{
+				await next();
+			});
+			app.UseRouting();// adds the IEndpointFeature to context.Features.
+			app.Use(async (context, next) =>
+			{
+				await next();
+			});
 			app.UseIdentityServer();
 			app.UseCors("mycustomcorspolicy");//always after UseIdentityServer
 			app.UseAuthorization();
+			app.Use(async (context, next) =>
+			{
+				// for some reason, when AddMicrosoftAccount is registered in tenant container, the callback endpoint is not found (IEndpointFeature is not added) :(
+				var endpoint = context.GetEndpoint();
+				var endpointRouteBuilder = context.RequestServices.GetService<EndpointDataSource>();
+
+				await next();
+			});
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapDefaultControllerRoute();

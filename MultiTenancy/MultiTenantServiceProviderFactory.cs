@@ -1,16 +1,16 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace MultiTenancy
 {
 	public class MultiTenantServiceProviderFactory<T> : IServiceProviderFactory<ContainerBuilder> where T : Tenant
 	{
 
-		private readonly Action<T, ContainerBuilder> _tenantSerivcesConfiguration;
+		private readonly Action<T, ContainerBuilder, IComponentContext> _tenantSerivcesConfiguration;
 
-		public MultiTenantServiceProviderFactory(Action<T, ContainerBuilder> tenantSerivcesConfiguration)
+		public MultiTenantServiceProviderFactory(Action<T, ContainerBuilder, IComponentContext> tenantSerivcesConfiguration)
 		{
 			_tenantSerivcesConfiguration = tenantSerivcesConfiguration;
 		}

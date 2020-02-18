@@ -13,7 +13,7 @@ namespace MultiTenancy
 		//This is the base application container
 		private readonly IContainer _applicationContainer;
 		//This action configures a container builder
-		private readonly Action<T, ContainerBuilder> _tenantContainerConfiguration;
+		private readonly Action<T, ContainerBuilder, IComponentContext> _tenantContainerConfiguration;
 
 		//This dictionary keeps track of all of the tenant scopes that we have created
 		private readonly Dictionary<string, ILifetimeScope> _tenantLifetimeScopes = new Dictionary<string, ILifetimeScope>();
@@ -25,7 +25,7 @@ namespace MultiTenancy
 		public event EventHandler<LifetimeScopeEndingEventArgs> CurrentScopeEnding;
 		public event EventHandler<ResolveOperationBeginningEventArgs> ResolveOperationBeginning;
 
-		public MultiTenantContainer(IContainer applicationContainer, Action<T, ContainerBuilder> containerConfiguration)
+		public MultiTenantContainer(IContainer applicationContainer, Action<T, ContainerBuilder, IComponentContext> containerConfiguration)
 		{
 			_tenantContainerConfiguration = containerConfiguration;
 			_applicationContainer = applicationContainer;
@@ -79,7 +79,7 @@ namespace MultiTenancy
 				else
 				{
 					//This is a new tenant, configure a new lifetimescope for it using our tenant sensitive configuration method
-					_tenantLifetimeScopes.Add(tenantId, _applicationContainer.BeginLifetimeScope(_multiTenantTag, a => _tenantContainerConfiguration(GetCurrentTenant(), a)));
+					_tenantLifetimeScopes.Add(tenantId, _applicationContainer.BeginLifetimeScope(_multiTenantTag, a => _tenantContainerConfiguration(GetCurrentTenant(), a, _applicationContainer)));
 					return _tenantLifetimeScopes[tenantId];
 				}
 			}
