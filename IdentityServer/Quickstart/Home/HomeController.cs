@@ -2,7 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
-using IdentityServer.MultiTenancy;
+using System.Threading.Tasks;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using System.Threading.Tasks;
+using MultiTenancy;
 
 namespace IdentityServer4.Quickstart.UI
 {
@@ -22,15 +22,15 @@ namespace IdentityServer4.Quickstart.UI
 		private readonly IWebHostEnvironment _environment;
 		private readonly ILogger _logger;
 		private readonly IConfiguration _config;
-		private readonly OperationIdService operationIdService;
+		private readonly TemporaryTenantGuidService temporaryTenantGuidService;
 
-		public HomeController(IIdentityServerInteractionService interaction, IWebHostEnvironment environment, ILogger<HomeController> logger, IConfiguration config, OperationIdService operationIdService)
+		public HomeController(IIdentityServerInteractionService interaction, IWebHostEnvironment environment, ILogger<HomeController> logger, IConfiguration config, TemporaryTenantGuidService temporaryTenantGuidService)
 		{
 			_interaction = interaction;
 			_environment = environment;
 			_logger = logger;
 			_config = config;
-			this.operationIdService = operationIdService;
+			this.temporaryTenantGuidService = temporaryTenantGuidService;
 		}
 
 		public async Task<IActionResult> Index()
@@ -38,11 +38,11 @@ namespace IdentityServer4.Quickstart.UI
 			return View();
 		}
 
-		public async Task<IActionResult> Opid()
+		public async Task<IActionResult> TemporaryTenantGuid()
 		{
 			return Ok(new
 			{
-				opid = this.operationIdService.Id
+				opid = this.temporaryTenantGuidService.Id
 			});
 		}
 

@@ -1,8 +1,8 @@
-﻿using Autofac;
+﻿using System;
+using Autofac;
 using Microsoft.Extensions.Options;
-using System;
 
-namespace IdentityServer.MultiTenancy
+namespace MultiTenancy
 {
 	public static class ContainerBuilderExtensions
 	{

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace IdentityServer.MultiTenancy
+namespace MultiTenancy
 {
-	public interface ITenantAccessor<T> where T : Tenant
+	public interface ITenantResolutionStrategy
 	{
-		T Tenant { get; }
+		Task<string> GetTenantIdentifierAsync();
 	}
 }

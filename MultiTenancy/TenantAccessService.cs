@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace IdentityServer.MultiTenancy
+namespace MultiTenancy
 {
 	/// <summary>
 	/// Tenant access service

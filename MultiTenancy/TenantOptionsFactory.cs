@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace IdentityServer.MultiTenancy
+namespace MultiTenancy
 {
 	/// <summary>
 	/// Create a new options instance with configuration applied

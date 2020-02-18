@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 
-namespace IdentityServer.MultiTenancy
+namespace MultiTenancy
 {
 	public class MultiTenantCookiePolicyMiddleware
 	{

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 
-namespace IdentityServer.MultiTenancy
+namespace MultiTenancy
 {
 	/// <summary>
 	/// Nice method to register our middleware

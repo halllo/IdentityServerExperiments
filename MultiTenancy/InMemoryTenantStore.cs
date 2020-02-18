@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 
-namespace IdentityServer.MultiTenancy
+namespace MultiTenancy
 {
 	/// <summary>
 	/// In memory store for testing

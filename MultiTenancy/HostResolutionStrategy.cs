@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
-namespace IdentityServer.MultiTenancy
+namespace MultiTenancy
 {
 	/// <summary>
 	/// Resolve the host to a tenant identifier

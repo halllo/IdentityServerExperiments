@@ -1,4 +1,4 @@
-﻿namespace IdentityServer.MultiTenancy
+﻿namespace MultiTenancy
 {
 	public static class MultiTenantConstants
 	{

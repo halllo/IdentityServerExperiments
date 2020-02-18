@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Options;
 using System.Collections.Concurrent;
 
-namespace IdentityServer.MultiTenancy
+namespace MultiTenancy
 {
 	/// <summary>
 	/// Dictionary of tenant specific options caches

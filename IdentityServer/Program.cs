@@ -1,9 +1,8 @@
 ﻿using System;
-using IdentityServer.MultiTenancy;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MultiTenancy;
 
 namespace IdentityServer
 {

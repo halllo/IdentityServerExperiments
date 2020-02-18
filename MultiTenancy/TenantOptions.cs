@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 
-namespace IdentityServer.MultiTenancy
+namespace MultiTenancy
 {
 	/// <summary>
 	/// Make IOptions tenant aware
