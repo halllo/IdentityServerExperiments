@@ -60,7 +60,7 @@ namespace IdentityServer
 
 			c.RegisterTenantOptions<CookiePolicyOptions, Tenant>((options, tenant) =>
 			{
-				options.ConsentCookie.Name = tenant.Id + "-consent";
+				options.ConsentCookie.Name = options.ConsentCookie.Name + "-" + tenant.Id;
 				options.CheckConsentNeeded = context => { return true; };
 				options.MinimumSameSitePolicy = SameSiteMode.None;
 			});

@@ -11,6 +11,19 @@ namespace MultiTenancy
 			_httpContextAccessor = httpContextAccessor;
 		}
 
-		public T Tenant => _httpContextAccessor.HttpContext.GetTenant<T>();
+		public T Tenant
+		{
+			get
+			{
+				if (_httpContextAccessor.HttpContext == null)
+				{
+					return null;
+				}
+				else
+				{
+					return _httpContextAccessor.HttpContext.GetTenant<T>();
+				}
+			}
+		}
 	}
 }

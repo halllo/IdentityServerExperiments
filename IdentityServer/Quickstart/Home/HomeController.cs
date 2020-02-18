@@ -42,7 +42,7 @@ namespace IdentityServer4.Quickstart.UI
 		{
 			return Ok(new
 			{
-				opid = this.temporaryTenantGuidService.Id
+				temporaryGuidPerTenant = this.temporaryTenantGuidService.Id
 			});
 		}
 

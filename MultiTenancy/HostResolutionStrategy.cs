@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Hosting;
 
 namespace MultiTenancy
 {
@@ -9,10 +11,12 @@ namespace MultiTenancy
 	public class HostResolutionStrategy : ITenantResolutionStrategy
 	{
 		private readonly IHttpContextAccessor _httpContextAccessor;
+		private readonly IWebHostEnvironment environment;
 
-		public HostResolutionStrategy(IHttpContextAccessor httpContextAccessor)
+		public HostResolutionStrategy(IHttpContextAccessor httpContextAccessor, IWebHostEnvironment environment)
 		{
 			_httpContextAccessor = httpContextAccessor;
+			this.environment = environment;
 		}
 
 		/// <summary>
@@ -28,13 +32,22 @@ namespace MultiTenancy
 			}
 			else
 			{
-				var routeValues = _httpContextAccessor.HttpContext.Request.RouteValues;
-				var path = _httpContextAccessor.HttpContext.Request.Path;
-				var host = _httpContextAccessor.HttpContext.Request.Host;
-				var hostHost = _httpContextAccessor.HttpContext.Request.Host.Host;
+				const string devTenantOverrideCookieKey = nameof(devTenantOverrideCookieKey);
+				if (this.environment.IsDevelopment() && _httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(devTenantOverrideCookieKey))
+				{
+					var tenantCookie = _httpContextAccessor.HttpContext.Request.Cookies[devTenantOverrideCookieKey];
+					return tenantCookie;
+				}
+				else
+				{
+					var routeValues = _httpContextAccessor.HttpContext.Request.RouteValues;
+					var path = _httpContextAccessor.HttpContext.Request.Path;
+					var host = _httpContextAccessor.HttpContext.Request.Host;
+					var hostHost = _httpContextAccessor.HttpContext.Request.Host.Host;
 
-				string tenantIdentifier = host.ToString();
-				return await Task.FromResult(tenantIdentifier);
+					string tenantIdentifier = host.ToString();
+					return await Task.FromResult(tenantIdentifier);
+				}
 			}
 		}
 

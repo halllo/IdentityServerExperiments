@@ -1,10 +1,10 @@
-﻿using Autofac;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Autofac;
 using Autofac.Core;
 using Autofac.Core.Lifetime;
 using Autofac.Core.Resolving;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace MultiTenancy
 {
@@ -36,15 +36,14 @@ namespace MultiTenancy
 		public object Tag => GetCurrentTenantScope().Tag;
 
 		public IComponentRegistry ComponentRegistry => GetCurrentTenantScope().ComponentRegistry;
-		
+
 		/// <summary>
 		/// Get the current teanant from the application container
 		/// </summary>
 		/// <returns></returns>
 		private T GetCurrentTenant()
 		{
-			//We have registered our TenantAccessService in Part 1, the service is available in the application container which allows us to access the current Tenant
-			return _applicationContainer.Resolve<TenantAccessService<T>>().GetTenantAsync().GetAwaiter().GetResult();
+			return _applicationContainer.Resolve<ITenantAccessor<T>>().Tenant;
 		}
 
 		/// <summary>
