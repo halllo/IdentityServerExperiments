@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using IdentityServer4;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
@@ -40,14 +41,7 @@ namespace IdentityServer
 				;
 
 			services.AddAuthentication();
-			//	.AddMicrosoftAccount("Microsoft", options =>
-			//	{
-			//		options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-			//		options.ClientId = config["MicrosoftAccountClientId"];
-			//		options.ClientSecret = config["MicrosoftAccountClientSecret"];
-			//		options.AuthorizationEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/authorize";
-			//		options.TokenEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/token";
-			//	});
+			services.PrepareMultiTenantOAuth<MicrosoftAccountHandler>("Microsoft", MicrosoftAccountDefaults.DisplayName);
 
 			services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
 
@@ -57,25 +51,23 @@ namespace IdentityServer
 				;
 		}
 
-		public static void ConfigureMultiTenantServices(Tenant t, ContainerBuilder c, IComponentContext applicationContainer)
+		public static void ConfigureMultiTenantServices(Tenant tenant, ContainerBuilder tenantContainer, IComponentContext applicationContainer)
 		{
-			c.RegisterTenantOptions<CookiePolicyOptions, Tenant>((options, tenant) =>
+			tenantContainer.RegisterType<TemporaryTenantGuidService>().SingleInstance();
+
+			var config = applicationContainer.Resolve<IConfiguration>();
+			var services = new ServiceCollection();
+
+			services.Configure<CookiePolicyOptions>(options =>
 			{
 				options.ConsentCookie.Name = options.ConsentCookie.Name + "-" + tenant.Id;
 				options.CheckConsentNeeded = context => { return true; };
 				options.MinimumSameSitePolicy = SameSiteMode.None;
 			});
 
-			c.RegisterType<TemporaryTenantGuidService>().SingleInstance();
-
-
-
-			var services = new ServiceCollection();
-
-
-			var config = applicationContainer.Resolve<IConfiguration>();
-			services.AddAuthentication()
-				.AddMicrosoftAccount("Microsoft", options =>
+			if (tenant.Identifier == "123")
+			{
+				services.AddMultiTenantOAuth<MicrosoftAccountOptions, MicrosoftAccountHandler>("Microsoft", options =>
 				{
 					options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
 					options.ClientId = config["MicrosoftAccountClientId"];
@@ -83,11 +75,9 @@ namespace IdentityServer
 					options.AuthorizationEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/authorize";
 					options.TokenEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/token";
 				});
+			}
 
-			c.Populate(services);
-
-
-
+			tenantContainer.Populate(services);
 		}
 
 		public void Configure(IApplicationBuilder app)
