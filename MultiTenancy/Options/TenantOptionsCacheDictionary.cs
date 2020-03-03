@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Options;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
+using Microsoft.Extensions.Options;
 
-namespace MultiTenancy
+namespace MultiTenancy.Options
 {
 	/// <summary>
 	/// Dictionary of tenant specific options caches

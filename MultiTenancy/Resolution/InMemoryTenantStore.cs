@@ -1,7 +1,6 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace MultiTenancy
+namespace MultiTenancy.Resolution
 {
 	/// <summary>
 	/// In memory store for testing
@@ -10,7 +9,6 @@ namespace MultiTenancy
 	{
 		public InMemoryTenantStore()
 		{
-			System.Console.WriteLine("InMemoryTenantStore.ctor");
 		}
 
 		/// <summary>

@@ -1,4 +1,4 @@
-﻿namespace MultiTenancy
+﻿namespace MultiTenancy.Resolution
 {
 	public static class MultiTenantConstants
 	{

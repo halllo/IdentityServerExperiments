@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MultiTenancy;
 
 namespace IdentityServer4.Quickstart.UI
 {
@@ -22,28 +21,18 @@ namespace IdentityServer4.Quickstart.UI
 		private readonly IWebHostEnvironment _environment;
 		private readonly ILogger _logger;
 		private readonly IConfiguration _config;
-		private readonly TemporaryTenantGuidService temporaryTenantGuidService;
 
-		public HomeController(IIdentityServerInteractionService interaction, IWebHostEnvironment environment, ILogger<HomeController> logger, IConfiguration config, TemporaryTenantGuidService temporaryTenantGuidService)
+		public HomeController(IIdentityServerInteractionService interaction, IWebHostEnvironment environment, ILogger<HomeController> logger, IConfiguration config)
 		{
 			_interaction = interaction;
 			_environment = environment;
 			_logger = logger;
 			_config = config;
-			this.temporaryTenantGuidService = temporaryTenantGuidService;
 		}
 
 		public async Task<IActionResult> Index()
 		{
 			return View();
-		}
-
-		public async Task<IActionResult> TemporaryTenantGuid()
-		{
-			return Ok(new
-			{
-				temporaryGuidPerTenant = this.temporaryTenantGuidService.Id
-			});
 		}
 
 		/// <summary>

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace MultiTenancy
+﻿namespace MultiTenancy
 {
 	/// <summary>
 	/// Tenant information
@@ -19,10 +14,5 @@ namespace MultiTenancy
 		/// The tenant identifier
 		/// </summary>
 		public string Identifier { get; set; }
-
-		/// <summary>
-		/// Tenant items
-		/// </summary>
-		public Dictionary<string, object> Items { get; private set; } = new Dictionary<string, object>();
 	}
 }

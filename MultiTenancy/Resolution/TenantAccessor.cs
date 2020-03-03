@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace MultiTenancy
+namespace MultiTenancy.Resolution
 {
 	public class TenantAccessor<T> : ITenantAccessor<T> where T : Tenant
 	{

@@ -2,7 +2,7 @@
 using Autofac;
 using Microsoft.Extensions.Options;
 
-namespace MultiTenancy
+namespace MultiTenancy.Options
 {
 	public static class ContainerBuilderExtensions
 	{

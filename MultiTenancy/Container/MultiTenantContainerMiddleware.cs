@@ -1,9 +1,9 @@
-﻿using Autofac.Extensions.DependencyInjection;
-using Microsoft.AspNetCore.Http;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http;
 
-namespace MultiTenancy
+namespace MultiTenancy.Container
 {
 	internal class MultiTenantContainerMiddleware<T> where T : Tenant
 	{

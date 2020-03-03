@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 
-namespace MultiTenancy
+namespace MultiTenancy.Resolution
 {
 	/// <summary>
 	/// Resolve the host to a tenant identifier

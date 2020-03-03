@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MultiTenancy;
+using MultiTenancy.Resolution;
 
 namespace IdentityServer
 {
@@ -52,8 +53,6 @@ namespace IdentityServer
 
 		public static void ConfigureMultiTenantServices(Tenant tenant, ContainerBuilder tenantContainer, IComponentContext applicationContainer)
 		{
-			tenantContainer.RegisterType<TemporaryTenantGuidService>().SingleInstance();
-
 			var config = applicationContainer.Resolve<IConfiguration>();
 			var services = new ServiceCollection();
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 
-namespace MultiTenancy
+namespace MultiTenancy.Options
 {
 	/// <summary>
 	/// Make IOptions tenant aware
@@ -16,7 +16,7 @@ namespace MultiTenancy
 			_cache = cache;
 		}
 
-		public TOptions Value => Get(Options.DefaultName);
+		public TOptions Value => Get(Microsoft.Extensions.Options.Options.DefaultName);
 
 		public TOptions Get(string name)
 		{

@@ -5,8 +5,9 @@ using Autofac;
 using Autofac.Core;
 using Autofac.Core.Lifetime;
 using Autofac.Core.Resolving;
+using MultiTenancy.Resolution;
 
-namespace MultiTenancy
+namespace MultiTenancy.Container
 {
 	internal class MultiTenantContainer<T> : IContainer where T : Tenant
 	{

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 
-namespace MultiTenancy
+namespace MultiTenancy.Resolution
 {
 	internal class TenantMiddleware<T> where T : Tenant
 	{

@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.Options;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Microsoft.Extensions.Options;
+using MultiTenancy.Resolution;
 
-namespace MultiTenancy
+namespace MultiTenancy.Options
 {
 	/// <summary>
 	/// Create a new options instance with configuration applied

@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using MultiTenancy.Container;
+using MultiTenancy.Resolution;
 
 namespace MultiTenancy
 {
@@ -14,7 +16,7 @@ namespace MultiTenancy
 			=> builder.UseMiddleware<TenantMiddleware<Tenant>>();
 
 		public static IApplicationBuilder UseMultiTenantContainer<T>(this IApplicationBuilder builder) where T : Tenant
-		   => builder.UseMiddleware<MultiTenantContainerMiddleware<T>>();
+			=> builder.UseMiddleware<MultiTenantContainerMiddleware<T>>();
 
 		public static IApplicationBuilder UseMultiTenantContainer(this IApplicationBuilder builder)
 			=> builder.UseMiddleware<MultiTenantContainerMiddleware<Tenant>>();

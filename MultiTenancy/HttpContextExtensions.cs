@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using MultiTenancy.Resolution;
 
 namespace MultiTenancy
 {

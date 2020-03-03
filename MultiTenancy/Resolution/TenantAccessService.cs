@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace MultiTenancy
+namespace MultiTenancy.Resolution
 {
 	/// <summary>
 	/// Tenant access service

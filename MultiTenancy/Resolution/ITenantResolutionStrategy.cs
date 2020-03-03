@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace MultiTenancy
+namespace MultiTenancy.Resolution
 {
 	public interface ITenantResolutionStrategy
 	{

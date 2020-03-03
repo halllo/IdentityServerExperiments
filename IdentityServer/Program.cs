@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MultiTenancy;
+using MultiTenancy.Container;
 
 namespace IdentityServer
 {
@@ -17,19 +18,19 @@ namespace IdentityServer
 		public static IHostBuilder CreateHostBuilder(string[] args)
 		{
 			return Host.CreateDefaultBuilder(args)
-					.UseServiceProviderFactory(new MultiTenantServiceProviderFactory<Tenant>(Startup.ConfigureMultiTenantServices))
-					.ConfigureLogging(logging =>
-					{
-						logging.AddAzureWebAppDiagnostics();
-					})
-					.ConfigureAppConfiguration((context, configBuilder) =>
-					{
-						configBuilder.AddAzureKeyVault();
-					})
-					.ConfigureWebHostDefaults(webBuilder =>
-					{
-						webBuilder.UseStartup<Startup>();
-					});
+				.UseServiceProviderFactory(new MultiTenantServiceProviderFactory<Tenant>(Startup.ConfigureMultiTenantServices))
+				.ConfigureLogging(logging =>
+				{
+					logging.AddAzureWebAppDiagnostics();
+				})
+				.ConfigureAppConfiguration((context, configBuilder) =>
+				{
+					configBuilder.AddAzureKeyVault();
+				})
+				.ConfigureWebHostDefaults(webBuilder =>
+				{
+					webBuilder.UseStartup<Startup>();
+				});
 		}
 	}
 }
