@@ -1,7 +1,7 @@
 ﻿using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using IdentityServer4;
-using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
@@ -41,7 +41,6 @@ namespace IdentityServer
 				;
 
 			services.AddAuthentication();
-			services.PrepareMultiTenantOAuth<MicrosoftAccountHandler>("Microsoft", MicrosoftAccountDefaults.DisplayName);
 
 			services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
 
@@ -67,7 +66,9 @@ namespace IdentityServer
 
 			if (tenant.Identifier == "123")
 			{
-				services.AddMultiTenantOAuth<MicrosoftAccountOptions, MicrosoftAccountHandler>("Microsoft", options =>
+				services.AddAuthentication();
+				var authenticationBuilder = new AuthenticationBuilder(services);
+				authenticationBuilder.AddMicrosoftAccount("Microsoft", options =>
 				{
 					options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
 					options.ClientId = config["MicrosoftAccountClientId"];
@@ -88,7 +89,7 @@ namespace IdentityServer
 
 			app.UseStaticFiles(); // Install IdentityServer UI: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/IdentityServer/IdentityServer4.Quickstart.UI/release/get.ps1'))
 
-			app.UseMiddleware<MultiTenantCookiePolicyMiddleware>();
+			app.UseMiddleware<ScopedCookiePolicyMiddleware>();
 
 			app.Use(async (context, next) =>
 			{
@@ -99,7 +100,7 @@ namespace IdentityServer
 			{
 				await next();
 			});
-			app.UseIdentityServer();
+			app.UseIdentityServer(new IdentityServerMiddlewareOptions { AuthenticationMiddleware = app => app.UseMiddleware<ScopedAuthenticationMiddleware>() });
 			app.UseCors("mycustomcorspolicy");//always after UseIdentityServer
 			app.UseAuthorization();
 			app.Use(async (context, next) =>

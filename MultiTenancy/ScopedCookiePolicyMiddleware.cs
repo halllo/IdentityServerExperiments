@@ -7,11 +7,11 @@ using Microsoft.Extensions.Options;
 
 namespace MultiTenancy
 {
-	public class MultiTenantCookiePolicyMiddleware
+	public class ScopedCookiePolicyMiddleware
 	{
 		private readonly RequestDelegate next;
 
-		public MultiTenantCookiePolicyMiddleware(RequestDelegate next)
+		public ScopedCookiePolicyMiddleware(RequestDelegate next)
 		{
 			this.next = next;
 		}
