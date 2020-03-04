@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MultiTenancy;
 using MultiTenancy.Resolution;
@@ -63,10 +63,17 @@ namespace IdentityServer
 				options.MinimumSameSitePolicy = SameSiteMode.None;
 			});
 
+			/*
+			 * Don't invoke services.AddAuthentication(); in each tenant service configuration!
+			 * Instead reuse IAuthenticationService and IClaimsTransformation registrations for all tenant containers.
+			 * Having a new IAuthenticationService seems to break IS4's idsv.session cookies.
+			 */
+			services.TryAddScoped<IAuthenticationHandlerProvider, AuthenticationHandlerProvider>();
+			services.TryAddSingleton<IAuthenticationSchemeProvider, AuthenticationSchemeProvider>();
+			var authenticationBuilder = new AuthenticationBuilder(services);
+
 			if (tenant.Identifier == "123")
 			{
-				services.AddAuthentication();
-				var authenticationBuilder = new AuthenticationBuilder(services);
 				authenticationBuilder.AddMicrosoftAccount("Microsoft", options =>
 				{
 					options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
@@ -83,33 +90,13 @@ namespace IdentityServer
 		public void Configure(IApplicationBuilder app)
 		{
 			app.UseDeveloperExceptionPage();
-
 			app.UseMultiTenancy().UseMultiTenantContainer();
-
 			app.UseStaticFiles(); // Install IdentityServer UI: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/IdentityServer/IdentityServer4.Quickstart.UI/release/get.ps1'))
-
 			app.UseMiddleware<ScopedCookiePolicyMiddleware>();
-
-			app.Use(async (context, next) =>
-			{
-				await next();
-			});
-			app.UseRouting();// adds the IEndpointFeature to context.Features.
-			app.Use(async (context, next) =>
-			{
-				await next();
-			});
+			app.UseRouting();
 			app.UseIdentityServer(new IdentityServerMiddlewareOptions { AuthenticationMiddleware = app => app.UseMiddleware<ScopedAuthenticationMiddleware>() });
 			app.UseCors("mycustomcorspolicy");//always after UseIdentityServer
 			app.UseAuthorization();
-			app.Use(async (context, next) =>
-			{
-				// for some reason, when AddMicrosoftAccount is registered in tenant container, the callback endpoint is not found (IEndpointFeature is not added) :(
-				var endpoint = context.GetEndpoint();
-				var endpointRouteBuilder = context.RequestServices.GetService<EndpointDataSource>();
-
-				await next();
-			});
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapDefaultControllerRoute();
