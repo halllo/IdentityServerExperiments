@@ -18,7 +18,7 @@ namespace MultiTenancy.Resolution
 		/// <returns></returns>
 		public async Task<Tenant> GetTenantAsync(string identifier)
 		{
-			return await Task.FromResult(new Tenant { Id = identifier, Identifier = identifier });
+			return await Task.FromResult(new Tenant { Name = identifier });
 		}
 	}
 }

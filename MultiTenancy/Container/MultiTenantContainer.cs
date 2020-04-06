@@ -5,11 +5,13 @@ using Autofac;
 using Autofac.Core;
 using Autofac.Core.Lifetime;
 using Autofac.Core.Resolving;
+using Autofac.Extensions.DependencyInjection;
 using MultiTenancy.Resolution;
 
 namespace MultiTenancy.Container
 {
-	internal class MultiTenantContainer<T> : IContainer where T : Tenant
+
+	internal class MultiTenantContainer<T> : IContainer, IMultiTenantContainer where T : Tenant
 	{
 		//This is the base application container
 		private readonly IContainer _applicationContainer;
@@ -38,52 +40,44 @@ namespace MultiTenancy.Container
 
 		public IComponentRegistry ComponentRegistry => GetCurrentTenantScope().ComponentRegistry;
 
-		/// <summary>
-		/// Get the current teanant from the application container
-		/// </summary>
-		/// <returns></returns>
+		public ILifetimeScope GetCurrentTenantScope()
+		{
+			return GetTenantScope(GetCurrentTenant()?.Name);
+		}
+
+		public ILifetimeScope GetTenantScope(string tenantName)
+		{
+			//If no tenant (e.g. early on in the pipeline, we just use the application container)
+			if (tenantName == null)
+				return _applicationContainer;
+
+			//If we have created a lifetime for a tenant, return
+			if (_tenantLifetimeScopes.ContainsKey(tenantName))
+				return _tenantLifetimeScopes[tenantName];
+
+			lock (_lock)
+			{
+				if (_tenantLifetimeScopes.ContainsKey(tenantName))
+				{
+					return _tenantLifetimeScopes[tenantName];
+				}
+				else
+				{
+					//This is a new tenant, configure a new lifetimescope for it using our tenant sensitive configuration method
+					_tenantLifetimeScopes.Add(tenantName, _applicationContainer.BeginLifetimeScope(_multiTenantTag, a => _tenantContainerConfiguration(GetTenant(tenantName), a, _applicationContainer)));
+					return _tenantLifetimeScopes[tenantName];
+				}
+			}
+		}
+
 		private T GetCurrentTenant()
 		{
 			return _applicationContainer.Resolve<ITenantAccessor<T>>().Tenant;
 		}
 
-		/// <summary>
-		/// Get the scope of the current tenant
-		/// </summary>
-		/// <returns></returns>
-		public ILifetimeScope GetCurrentTenantScope()
+		private T GetTenant(string identifier)
 		{
-			return GetTenantScope(GetCurrentTenant()?.Id);
-		}
-
-		/// <summary>
-		/// Get (configure on missing)
-		/// </summary>
-		/// <param name="tenantId"></param>
-		/// <returns></returns>
-		public ILifetimeScope GetTenantScope(string tenantId)
-		{
-			//If no tenant (e.g. early on in the pipeline, we just use the application container)
-			if (tenantId == null)
-				return _applicationContainer;
-
-			//If we have created a lifetime for a tenant, return
-			if (_tenantLifetimeScopes.ContainsKey(tenantId))
-				return _tenantLifetimeScopes[tenantId];
-
-			lock (_lock)
-			{
-				if (_tenantLifetimeScopes.ContainsKey(tenantId))
-				{
-					return _tenantLifetimeScopes[tenantId];
-				}
-				else
-				{
-					//This is a new tenant, configure a new lifetimescope for it using our tenant sensitive configuration method
-					_tenantLifetimeScopes.Add(tenantId, _applicationContainer.BeginLifetimeScope(_multiTenantTag, a => _tenantContainerConfiguration(GetCurrentTenant(), a, _applicationContainer)));
-					return _tenantLifetimeScopes[tenantId];
-				}
-			}
+			return _applicationContainer.Resolve<ITenantStore<T>>().GetTenantAsync(identifier).ConfigureAwait(false).GetAwaiter().GetResult();
 		}
 
 		public void Dispose()
@@ -125,5 +119,7 @@ namespace MultiTenancy.Container
 		{
 			return GetCurrentTenantScope().DisposeAsync();
 		}
+
+		IServiceProvider IMultiTenantContainer.GetTenantContainer(string tenantName) => new AutofacServiceProvider(GetTenantScope(tenantName).BeginLifetimeScope());
 	}
 }

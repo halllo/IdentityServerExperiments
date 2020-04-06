@@ -14,8 +14,8 @@ namespace MultiTenancy
 
 		public TenantBuilder(IServiceCollection services)
 		{
-			services.AddTransient<ITenantAccessor<T>, TenantAccessor<T>>();
-			services.AddTransient<TenantAccessService<T>>();
+			services.TryAddTransient<ITenantAccessor<T>, TenantAccessor<T>>();
+			services.TryAddTransient<TenantAccessService<T>>();
 			_services = services;
 		}
 
@@ -28,7 +28,7 @@ namespace MultiTenancy
 		public TenantBuilder<T> WithResolutionStrategy<V>(ServiceLifetime lifetime = ServiceLifetime.Transient) where V : class, ITenantResolutionStrategy
 		{
 			_services.TryAddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-			_services.Add(ServiceDescriptor.Describe(typeof(ITenantResolutionStrategy), typeof(V), lifetime));
+			_services.TryAdd(ServiceDescriptor.Describe(typeof(ITenantResolutionStrategy), typeof(V), lifetime));
 			return this;
 		}
 
@@ -40,7 +40,7 @@ namespace MultiTenancy
 		/// <returns></returns>
 		public TenantBuilder<T> WithStore<V>(ServiceLifetime lifetime = ServiceLifetime.Transient) where V : class, ITenantStore<T>
 		{
-			_services.Add(ServiceDescriptor.Describe(typeof(ITenantStore<T>), typeof(V), lifetime));
+			_services.TryAdd(ServiceDescriptor.Describe(typeof(ITenantStore<T>), typeof(V), lifetime));
 			return this;
 		}
 	}

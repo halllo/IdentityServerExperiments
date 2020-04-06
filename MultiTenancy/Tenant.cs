@@ -6,13 +6,8 @@
 	public class Tenant
 	{
 		/// <summary>
-		/// The tenant Id
+		/// The tenant name
 		/// </summary>
-		public string Id { get; set; }
-
-		/// <summary>
-		/// The tenant identifier
-		/// </summary>
-		public string Identifier { get; set; }
+		public string Name { get; set; }
 	}
 }

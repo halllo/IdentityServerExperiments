@@ -2,6 +2,7 @@
 @{
 	var version = typeof(IdentityServer4.Hosting.IdentityServerMiddleware).Assembly.GetName().Version.ToString();
 }
+@inject IdentityServer.IResolvedTenant  tenant;
 
 <div class="welcome-page">
 	<div class="row page-header">
@@ -29,7 +30,7 @@
 		</div>
 		<div class="col-sm-8">
 			<p>
-				Tenant ID: @(Context.GetTenant()?.Id ?? "<no tenant>")
+				Tenant ID: @(tenant.TenantName)
 			</p>
 		</div>
 	</div>

@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
-using MultiTenancy.Resolution;
 
-namespace MultiTenancy
+namespace MultiTenancy.Resolution
 {
 	public static class HttpContextExtensions
 	{

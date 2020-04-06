@@ -2,13 +2,13 @@
 using Autofac.Extensions.DependencyInjection;
 using IdentityServer4;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using MultiTenancy;
 using MultiTenancy.Resolution;
@@ -46,7 +46,7 @@ namespace IdentityServer
 			services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
 
 			services.AddMultiTenancy()
-				.WithResolutionStrategy<HostResolutionStrategy>()
+				.WithResolutionStrategy<SubdomainResolutionStrategy>()
 				.WithStore<InMemoryTenantStore>(ServiceLifetime.Singleton)
 				;
 		}
@@ -58,22 +58,19 @@ namespace IdentityServer
 
 			services.Configure<CookiePolicyOptions>(options =>
 			{
-				options.ConsentCookie.Name = options.ConsentCookie.Name + "-" + tenant.Id;
 				options.CheckConsentNeeded = context => { return true; };
 				options.MinimumSameSitePolicy = SameSiteMode.None;
 			});
 
-			/*
-			 * Don't invoke services.AddAuthentication(); in each tenant service configuration!
-			 * Instead reuse IAuthenticationService and IClaimsTransformation registrations for all tenant containers.
-			 * Having a new IAuthenticationService seems to break IS4's idsv.session cookies.
-			 */
-			services.TryAddScoped<IAuthenticationHandlerProvider, AuthenticationHandlerProvider>();
-			services.TryAddSingleton<IAuthenticationSchemeProvider, AuthenticationSchemeProvider>();
-			var authenticationBuilder = new AuthenticationBuilder(services);
+			services.AddSingleton<IResolvedTenant>(new ResolvedTenant(tenant));
 
-			if (tenant.Identifier == "123")
+			services.AddAuthenticationMinimumForTenant()
+				.PrepareScheme<MicrosoftAccountOptions, MicrosoftAccountHandler>();
+
+
+			if (tenant.Name == "123")
 			{
+				var authenticationBuilder = new AuthenticationBuilder(services);
 				authenticationBuilder.AddMicrosoftAccount("Microsoft", options =>
 				{
 					options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
