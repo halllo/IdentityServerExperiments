@@ -16,7 +16,7 @@ namespace IdentityServer
 		public static void Main(string[] args)
 		{
 			Console.Title = "IdentityServer";
-			WebHostBuilder(args).Build().Run();
+			GenericHostBuilder(args).Build().Run();
 		}
 
 		public static IWebHostBuilder WebHostBuilder(string[] args)
@@ -52,6 +52,7 @@ namespace IdentityServer
 				})
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
+					//webBuilder.UseIISIntegration();
 					webBuilder.UseStartup<Startup>();
 				});
 		}

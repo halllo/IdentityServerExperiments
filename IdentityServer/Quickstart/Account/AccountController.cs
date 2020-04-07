@@ -257,12 +257,14 @@ namespace IdentityServer4.Quickstart.UI
 			var schemes = await _schemeProvider.GetAllSchemesAsync();
 
 			var providers = schemes
-				.Where(x => x.DisplayName != null ||
+				.Where(x => !string.IsNullOrWhiteSpace(x.DisplayName) ||
 							(x.Name.Equals(AccountOptions.WindowsAuthenticationSchemeName, StringComparison.OrdinalIgnoreCase))
 				)
 				.Select(x => new ExternalProvider
 				{
-					DisplayName = x.DisplayName,
+					DisplayName = string.IsNullOrWhiteSpace(x.DisplayName) && x.Name.Equals(AccountOptions.WindowsAuthenticationSchemeName, StringComparison.OrdinalIgnoreCase)
+						? AccountOptions.WindowsAuthenticationSchemeName
+						: x.DisplayName,
 					AuthenticationScheme = x.Name
 				}).ToList();
 
