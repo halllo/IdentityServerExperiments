@@ -82,7 +82,7 @@ namespace IdentityServer
 					options.TokenEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/token";
 				});
 			}
-			else
+			else if (tenant.Name == "win")
 			{
 				services.Configure<AuthenticationOptions>(o =>
 				{
@@ -91,6 +91,21 @@ namespace IdentityServer
 						scheme.HandlerType = typeof(IISServerAuthenticationHandler);
 						scheme.DisplayName = IISServerDefaults.AuthenticationScheme + "!";
 					});
+				});
+			}
+			else
+			{
+				var authenticationBuilder = new AuthenticationBuilder(services);
+				authenticationBuilder.AddOpenIdConnect("localidsrv", "Local IDSRV", options =>
+				{
+					options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+					options.SignOutScheme = IdentityServerConstants.SignoutScheme;
+
+					options.Authority = "https://localhost:44390/";
+					options.ClientId = "idsrv_login";
+					options.ClientSecret = "secret";
+					options.ResponseType = "code";
+					options.SaveTokens = true;
 				});
 			}
 
