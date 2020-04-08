@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Server.IIS;
+using Microsoft.AspNetCore.Server.IIS.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -78,6 +80,32 @@ namespace IdentityServer
 					options.ClientSecret = config["MicrosoftAccountClientSecret"];
 					options.AuthorizationEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/authorize";
 					options.TokenEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/token";
+				});
+			}
+			else if (tenant.Name == "win")
+			{
+				services.Configure<AuthenticationOptions>(o =>
+				{
+					o.AddScheme(IISServerDefaults.AuthenticationScheme, scheme =>
+					{
+						scheme.HandlerType = typeof(IISServerAuthenticationHandler);
+						scheme.DisplayName = IISServerDefaults.AuthenticationScheme + "!";
+					});
+				});
+			}
+			else
+			{
+				var authenticationBuilder = new AuthenticationBuilder(services);
+				authenticationBuilder.AddOpenIdConnect("localidsrv", "Local IDSRV", options =>
+				{
+					options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+					options.SignOutScheme = IdentityServerConstants.SignoutScheme;
+
+					options.Authority = "https://localhost:44390/";
+					options.ClientId = "idsrv_login";
+					options.ClientSecret = "secret";
+					options.ResponseType = "code";
+					options.SaveTokens = true;
 				});
 			}
 

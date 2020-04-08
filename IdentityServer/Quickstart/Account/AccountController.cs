@@ -112,7 +112,7 @@ namespace IdentityServer4.Quickstart.UI
 				if (_users.ValidateCredentials(model.Username, model.Password))
 				{
 					var user = _users.FindByUsername(model.Username);
-					await _events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username));
+					await _events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username, clientId: context?.ClientId));
 
 					// only set explicit expiration here if user chooses "remember me". 
 					// otherwise we rely upon expiration configured in cookie middleware.
@@ -158,7 +158,7 @@ namespace IdentityServer4.Quickstart.UI
 					}
 				}
 
-				await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials"));
+				await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials", clientId: context?.ClientId));
 				ModelState.AddModelError(string.Empty, AccountOptions.InvalidCredentialsErrorMessage);
 			}
 
@@ -221,6 +221,11 @@ namespace IdentityServer4.Quickstart.UI
 			return View("LoggedOut", vm);
 		}
 
+		[HttpGet]
+		public IActionResult AccessDenied()
+		{
+			return View();
+		}
 
 
 		/*****************************************/
@@ -229,7 +234,7 @@ namespace IdentityServer4.Quickstart.UI
 		private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
 		{
 			var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-			if (context?.IdP != null)
+			if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
 			{
 				var local = context.IdP == IdentityServer4.IdentityServerConstants.LocalIdentityProvider;
 
@@ -252,12 +257,14 @@ namespace IdentityServer4.Quickstart.UI
 			var schemes = await _schemeProvider.GetAllSchemesAsync();
 
 			var providers = schemes
-				.Where(x => x.DisplayName != null ||
+				.Where(x => !string.IsNullOrWhiteSpace(x.DisplayName) ||
 							(x.Name.Equals(AccountOptions.WindowsAuthenticationSchemeName, StringComparison.OrdinalIgnoreCase))
 				)
 				.Select(x => new ExternalProvider
 				{
-					DisplayName = x.DisplayName,
+					DisplayName = string.IsNullOrWhiteSpace(x.DisplayName) && x.Name.Equals(AccountOptions.WindowsAuthenticationSchemeName, StringComparison.OrdinalIgnoreCase)
+						? AccountOptions.WindowsAuthenticationSchemeName
+						: x.DisplayName,
 					AuthenticationScheme = x.Name
 				}).ToList();
 

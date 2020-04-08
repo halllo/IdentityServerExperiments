@@ -18,7 +18,7 @@
 					</div>
 					<div class="panel-body">
 
-						<form asp-route="Login" id="login-form">
+						<form asp-route="Login">
 							<input type="hidden" asp-for="ReturnUrl" />
 
 							<fieldset>
@@ -43,7 +43,6 @@
 									<button class="btn btn-primary" name="button" value="login">Login</button>
 									<button class="btn btn-default" name="button" value="cancel">Cancel</button>
 								</div>
-								@*<input type="hidden" id="fido-input" name="button" value="abc123">*@
 							</fieldset>
 						</form>
 
