@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using IdentityServer.Extended;
+using IdentityServer.ExternalAuth;
 using IdentityServer4;
+using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Microsoft.AspNetCore.Builder;
@@ -52,7 +51,10 @@ namespace IdentityServer
 
 			services.AddAuthentication();
 
+			services.AddTransient<RequestFromOnPremise>();
+
 			services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
+			services.AddTransientDecorator<IAuthorizeRequestValidator, ExtendedAuthorizeRequestValidator>();
 
 			services.AddMultiTenancy()
 				.WithResolutionStrategy<SubdomainResolutionStrategy>()
@@ -102,13 +104,14 @@ namespace IdentityServer
 			}
 			else
 			{
+				var requestFromOnPremise = applicationContainer.Resolve<RequestFromOnPremise>();
 				var authenticationBuilder = new AuthenticationBuilder(services);
 				authenticationBuilder.AddOpenIdConnect("localidsrv", "Local IDSRV", options =>
 				{
 					options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
 					options.SignOutScheme = IdentityServerConstants.SignoutScheme;
 
-					options.Authority = "https://localhost:44390/";
+					options.Authority = "https://localhost:44390/"; //BackchannelHttpHandler will tunnel the request to on premise agent
 					options.ClientId = "idsrv_login";
 					options.ClientSecret = "secret";
 					options.ResponseType = "code";
@@ -122,8 +125,7 @@ namespace IdentityServer
 							new JsonWebKey("{\"kty\":\"RSA\",\"use\":\"sig\",\"kid\":\"3ZnDeMHzya1AWdC9E-oalw\",\"e\":\"AQAB\",\"n\":\"m1Qei7u2ndJdyQ4n_uLqLRTw1Suze-VJJLHoD4roENdSAkRuFa1eh9R7nGvGKPCAKYISICu0hm_ZXTAWibQeKR4X8fcHyjfqipOL-UOp5_yUO7CyFbQ3P_5Up4dP26ZbSKTr7ak3hTGw9ZcFEd2HUY2zdoUlJw5LTAUNFGVx6EYWcIoeGwxxFmUljIJ1bVKeizHJc_rKULTC09Rzo3Gm1RXs-z7sH_6yCiXB6uBdxRUVwKHUAMTYOTi07t1zDACauIfxiT6fjfameONCjteDBbHj1DxcA-6rpvza4ahhbmRb5SgLTtPru1ax47qJccHyxiK7icMXkpKj2Zae13hHlQ\",\"alg\":\"RS256\"}")
 						}
 					};
-
-					options.BackchannelHttpHandler = new DelegatingHttpMessageHandler();
+					options.BackchannelHttpHandler = new RequestFromOnPremiseHttpMessageHandler(requestFromOnPremise, tenant.Name);
 				});
 			}
 
@@ -144,55 +146,6 @@ namespace IdentityServer
 			{
 				endpoints.MapDefaultControllerRoute();
 			});
-		}
-	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	public class DelegatingHttpMessageHandler : FuncableHttpMessageHandler
-	{
-		public DelegatingHttpMessageHandler()
-		{
-			Sender = async req =>
-			{
-				var clonedContent = new ByteArrayContent(await req.Content.ReadAsByteArrayAsync());
-				clonedContent.Headers.ContentType = req.Content.Headers.ContentType;
-				using (var http = new HttpClient())
-				{
-					var res = await http.PostAsync(req.RequestUri.AbsoluteUri, clonedContent);
-					var outterResponse = new HttpResponseMessage(res.StatusCode);
-					var responseContent = await res.Content.ReadAsStringAsync();
-					await Task.Delay(TimeSpan.FromSeconds(10));
-					outterResponse.Content = new StringContent(responseContent, Encoding.UTF8, "application/json");
-					return outterResponse;
-				}
-			};
-		}
-	}
-
-	public class FuncableHttpMessageHandler : HttpMessageHandler
-	{
-		public Func<HttpRequestMessage, Task<HttpResponseMessage>> Sender { get; set; }
-
-		protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
-		{
-			if (Sender != null)
-			{
-				return await Sender(request);
-			}
-
-			return null;
 		}
 	}
 }
