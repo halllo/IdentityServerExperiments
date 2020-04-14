@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
+﻿using System;
 using System.Linq;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace IdentityServer
 {
@@ -13,6 +13,14 @@ namespace IdentityServer
 		{
 			services.AddDecorator<TService>();
 			services.AddTransient<TService, TImplementation>();
+		}
+
+		public static void AddScopedDecorator<TService, TImplementation>(this IServiceCollection services)
+			where TService : class
+			where TImplementation : class, TService
+		{
+			services.AddDecorator<TService>();
+			services.AddScoped<TService, TImplementation>();
 		}
 
 		private static void AddDecorator<TService>(this IServiceCollection services)
