@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -21,13 +22,22 @@ namespace MultiTenancy
 			return new Builder(services);
 		}
 
-		public static void PrepareScheme<TOptions, THandler>(this Builder builder)
+		public static Builder PrepareOidcScheme(this Builder builder)
+		{
+			builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, OpenIdConnectPostConfigureOptions>());
+			builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<OpenIdConnectOptions>, EnsureSignInScheme<OpenIdConnectOptions>>());
+			builder.Services.TryAddTransient<OpenIdConnectHandler>();
+			return builder;
+		}
+
+		public static Builder PrepareOAuthScheme<TOptions, THandler>(this Builder builder)
 			where TOptions : OAuthOptions, new()
 			where THandler : OAuthHandler<TOptions>
 		{
 			builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<TOptions>, OAuthPostConfigureOptions<TOptions, THandler>>());
 			builder.Services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<TOptions>, EnsureSignInScheme<TOptions>>());
 			builder.Services.TryAddTransient<THandler>();
+			return builder;
 		}
 
 

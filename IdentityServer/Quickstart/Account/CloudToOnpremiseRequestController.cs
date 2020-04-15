@@ -7,6 +7,7 @@ namespace IdentityServer.Quickstart.Account
 {
 	[Route("api/[controller]")]
 	[ApiController]
+	//[Authorize] with client credentials
 	public class CloudToOnpremiseRequestController : ControllerBase
 	{
 		//store this in db
@@ -28,13 +29,14 @@ namespace IdentityServer.Quickstart.Account
 
 
 
-
+		public string TenantId => "localhost" //"manuels-identityserver"//User.TenantId()
+			;
 
 
 		[HttpGet]
 		public ActionResult GetRequests()
 		{
-			var tenantId = "manuels-identityserver";//User.TenantId();
+			var tenantId = TenantId;
 			var rs = requests.Select(r => r.Value).Where(r => r.TenantId == tenantId && r.ResponseStatusCode == null).Select(r => NewRequestDto(r)).ToList();
 			return Ok(rs);
 		}
@@ -42,7 +44,7 @@ namespace IdentityServer.Quickstart.Account
 		[HttpPost]
 		public ActionResult Respond([FromBody]ResponseDto response)
 		{
-			var tenantId = "manuels-identityserver";//User.TenantId();
+			var tenantId = TenantId;
 			var rs = requests.Select(r => r.Value).Where(r => r.TenantId == tenantId && r.ResponseStatusCode == null && r.Id == response.Id).SingleOrDefault();
 			if (rs != null)
 			{
