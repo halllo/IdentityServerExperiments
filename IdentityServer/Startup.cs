@@ -50,6 +50,7 @@ namespace IdentityServer
 				.AddTestUsers(IdentityConfig.GetTestUsers())
 				;
 
+			services.AddScoped<DisposeTest>();
 			services.AddAuthentication();
 
 			services.AddTransient<RequestFromOnPremise>();

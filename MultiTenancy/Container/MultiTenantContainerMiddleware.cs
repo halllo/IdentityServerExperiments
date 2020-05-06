@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Http;
@@ -18,8 +19,18 @@ namespace MultiTenancy.Container
 		{
 			//Set to current tenant container.
 			//Begin new scope for request as ASP.NET Core standard scope is per-request
-			context.RequestServices = new AutofacServiceProvider(multiTenantContainerAccessor().GetCurrentTenantScope().BeginLifetimeScope());
-			await next.Invoke(context);
+			var autofacServiceProvider = new AutofacServiceProvider(multiTenantContainerAccessor().GetCurrentTenantScope().BeginLifetimeScope());
+			var fe = context.Features.Select(f => f.Value).ToList(); //request services are handled by the RequestServicesFeature
+
+			context.RequestServices = autofacServiceProvider;
+			try
+			{
+				await next.Invoke(context);
+			}
+			finally
+			{
+				await autofacServiceProvider.DisposeAsync();
+			}
 		}
 	}
 }
