@@ -20,6 +20,7 @@ using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using MultiTenancy;
 using MultiTenancy.Resolution;
+using Newtonsoft.Json;
 
 namespace IdentityServer
 {
@@ -49,6 +50,7 @@ namespace IdentityServer
 				.AddTestUsers(IdentityConfig.GetTestUsers())
 				;
 
+			services.AddScoped<DisposeTest>();
 			services.AddAuthentication();
 
 			services.AddTransient<RequestFromOnPremise>();
@@ -76,7 +78,8 @@ namespace IdentityServer
 			services.AddSingleton<IResolvedTenant>(new ResolvedTenant(tenant));
 
 			services.AddAuthenticationMinimumForTenant()
-				.PrepareScheme<MicrosoftAccountOptions, MicrosoftAccountHandler>();
+				.PrepareOidcScheme()
+				.PrepareOAuthScheme<MicrosoftAccountOptions, MicrosoftAccountHandler>();
 
 
 			if (tenant.Name == "123")
@@ -106,6 +109,7 @@ namespace IdentityServer
 			{
 				var requestFromOnPremise = applicationContainer.Resolve<RequestFromOnPremise>();
 				var authenticationBuilder = new AuthenticationBuilder(services);
+
 				authenticationBuilder.AddOpenIdConnect("localidsrv", "Local IDSRV", options =>
 				{
 					options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
@@ -117,20 +121,18 @@ namespace IdentityServer
 					options.ResponseType = "code";
 					options.SaveTokens = true;
 
-					options.Configuration = new OpenIdConnectConfiguration("{\"issuer\":\"https://localhost:44390\",\"jwks_uri\":\"https://localhost:44390/.well-known/openid-configuration/jwks\",\"authorization_endpoint\":\"https://localhost:44390/connect/authorize\",\"token_endpoint\":\"https://localhost:44390/connect/token\",\"userinfo_endpoint\":\"https://localhost:44390/connect/userinfo\",\"end_session_endpoint\":\"https://localhost:44390/connect/endsession\",\"check_session_iframe\":\"https://localhost:44390/connect/checksession\",\"revocation_endpoint\":\"https://localhost:44390/connect/revocation\",\"introspection_endpoint\":\"https://localhost:44390/connect/introspect\",\"device_authorization_endpoint\":\"https://localhost:44390/connect/deviceauthorization\",\"frontchannel_logout_supported\":true,\"frontchannel_logout_session_supported\":true,\"backchannel_logout_supported\":true,\"backchannel_logout_session_supported\":true,\"scopes_supported\":[\"openid\",\"profile\",\"book.read\",\"book.write\",\"offline_access\"],\"claims_supported\":[\"sub\",\"name\",\"family_name\",\"given_name\",\"middle_name\",\"nickname\",\"preferred_username\",\"profile\",\"picture\",\"website\",\"gender\",\"birthdate\",\"zoneinfo\",\"locale\",\"updated_at\"],\"grant_types_supported\":[\"authorization_code\",\"client_credentials\",\"refresh_token\",\"implicit\",\"password\",\"urn:ietf:params:oauth:grant-type:device_code\"],\"response_types_supported\":[\"code\",\"token\",\"id_token\",\"id_token token\",\"code id_token\",\"code token\",\"code id_token token\"],\"response_modes_supported\":[\"form_post\",\"query\",\"fragment\"],\"token_endpoint_auth_methods_supported\":[\"client_secret_basic\",\"client_secret_post\"],\"id_token_signing_alg_values_supported\":[\"RS256\"],\"subject_types_supported\":[\"public\"],\"code_challenge_methods_supported\":[\"plain\",\"S256\"],\"request_parameter_supported\":true}");
+					options.BackchannelHttpHandler = new RequestFromOnPremiseHttpMessageHandler(requestFromOnPremise, tenant.Name);
+					options.Configuration = JsonConvert.DeserializeObject<OpenIdConnectConfiguration>("{\"issuer\":\"https://localhost:44390\",\"jwks_uri\":\"https://localhost:44390/.well-known/openid-configuration/jwks\",\"authorization_endpoint\":\"https://localhost:44390/connect/authorize\",\"token_endpoint\":\"https://localhost:44390/connect/token\",\"userinfo_endpoint\":\"https://localhost:44390/connect/userinfo\",\"end_session_endpoint\":\"https://localhost:44390/connect/endsession\",\"check_session_iframe\":\"https://localhost:44390/connect/checksession\",\"revocation_endpoint\":\"https://localhost:44390/connect/revocation\",\"introspection_endpoint\":\"https://localhost:44390/connect/introspect\",\"device_authorization_endpoint\":\"https://localhost:44390/connect/deviceauthorization\",\"frontchannel_logout_supported\":true,\"frontchannel_logout_session_supported\":true,\"backchannel_logout_supported\":true,\"backchannel_logout_session_supported\":true,\"scopes_supported\":[\"openid\",\"profile\",\"book.read\",\"book.write\",\"offline_access\"],\"claims_supported\":[\"sub\",\"name\",\"family_name\",\"given_name\",\"middle_name\",\"nickname\",\"preferred_username\",\"profile\",\"picture\",\"website\",\"gender\",\"birthdate\",\"zoneinfo\",\"locale\",\"updated_at\"],\"grant_types_supported\":[\"authorization_code\",\"client_credentials\",\"refresh_token\",\"implicit\",\"password\",\"urn:ietf:params:oauth:grant-type:device_code\"],\"response_types_supported\":[\"code\",\"token\",\"id_token\",\"id_token token\",\"code id_token\",\"code token\",\"code id_token token\"],\"response_modes_supported\":[\"form_post\",\"query\",\"fragment\"],\"token_endpoint_auth_methods_supported\":[\"client_secret_basic\",\"client_secret_post\"],\"id_token_signing_alg_values_supported\":[\"RS256\"],\"subject_types_supported\":[\"public\"],\"code_challenge_methods_supported\":[\"plain\",\"S256\"],\"request_parameter_supported\":true}");
 					options.TokenValidationParameters = new TokenValidationParameters
 					{
-						IssuerSigningKeys = new List<SecurityKey>
-						{
-							new JsonWebKey("{\"kty\":\"RSA\",\"use\":\"sig\",\"kid\":\"3ZnDeMHzya1AWdC9E-oalw\",\"e\":\"AQAB\",\"n\":\"m1Qei7u2ndJdyQ4n_uLqLRTw1Suze-VJJLHoD4roENdSAkRuFa1eh9R7nGvGKPCAKYISICu0hm_ZXTAWibQeKR4X8fcHyjfqipOL-UOp5_yUO7CyFbQ3P_5Up4dP26ZbSKTr7ak3hTGw9ZcFEd2HUY2zdoUlJw5LTAUNFGVx6EYWcIoeGwxxFmUljIJ1bVKeizHJc_rKULTC09Rzo3Gm1RXs-z7sH_6yCiXB6uBdxRUVwKHUAMTYOTi07t1zDACauIfxiT6fjfameONCjteDBbHj1DxcA-6rpvza4ahhbmRb5SgLTtPru1ax47qJccHyxiK7icMXkpKj2Zae13hHlQ\",\"alg\":\"RS256\"}")
-						}
+						IssuerSigningKeys = JsonConvert.DeserializeObject<Jwks>("{\"keys\":[{\"kty\":\"RSA\",\"use\":\"sig\",\"kid\":\"3ZnDeMHzya1AWdC9E-oalw\",\"e\":\"AQAB\",\"n\":\"m1Qei7u2ndJdyQ4n_uLqLRTw1Suze-VJJLHoD4roENdSAkRuFa1eh9R7nGvGKPCAKYISICu0hm_ZXTAWibQeKR4X8fcHyjfqipOL-UOp5_yUO7CyFbQ3P_5Up4dP26ZbSKTr7ak3hTGw9ZcFEd2HUY2zdoUlJw5LTAUNFGVx6EYWcIoeGwxxFmUljIJ1bVKeizHJc_rKULTC09Rzo3Gm1RXs-z7sH_6yCiXB6uBdxRUVwKHUAMTYOTi07t1zDACauIfxiT6fjfameONCjteDBbHj1DxcA-6rpvza4ahhbmRb5SgLTtPru1ax47qJccHyxiK7icMXkpKj2Zae13hHlQ\",\"alg\":\"RS256\"}]}").Keys
 					};
-					options.BackchannelHttpHandler = new RequestFromOnPremiseHttpMessageHandler(requestFromOnPremise, tenant.Name);
 				});
 			}
 
 			tenantContainer.Populate(services);
 		}
+		private class Jwks { public List<JsonWebKey> Keys { get; set; } }
 
 		public void Configure(IApplicationBuilder app)
 		{

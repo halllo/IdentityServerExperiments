@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using IdentityModel;
+using IdentityServer;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
@@ -39,6 +40,7 @@ namespace IdentityServer4.Quickstart.UI
 			IClientStore clientStore,
 			IAuthenticationSchemeProvider schemeProvider,
 			IEventService events,
+			DisposeTest disposeTest,
 			TestUserStore users = null)
 		{
 			// if the TestUserStore is not in DI, then we'll just use the global users collection
@@ -49,6 +51,9 @@ namespace IdentityServer4.Quickstart.UI
 			_clientStore = clientStore;
 			_schemeProvider = schemeProvider;
 			_events = events;
+
+
+			disposeTest.ToString();
 		}
 
 		/// <summary>

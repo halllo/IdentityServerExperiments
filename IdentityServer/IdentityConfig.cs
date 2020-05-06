@@ -79,6 +79,25 @@ namespace IdentityServer
 					AllowedScopes = { "openid", "profile", "book.read", "book.write" },
 					AlwaysIncludeUserClaimsInIdToken = true
 				},
+				new Client
+				{
+					ClientId = "idsrv_login",
+					ClientSecrets = { new Secret("secret".Sha256()) },
+
+					AllowedGrantTypes = GrantTypes.Code,
+					RequireConsent = false,
+					RequirePkce = true,
+					RedirectUris = new List<string>
+					{
+						"https://localhost:44366/signin-oidc2",
+					},
+					PostLogoutRedirectUris = new List<string>
+					{
+						"https://localhost:44366/signout-callback-oidc2",
+					},
+					AllowedScopes = { "openid", "profile" },
+					AlwaysIncludeUserClaimsInIdToken = true
+				},
 			};
 		}
 

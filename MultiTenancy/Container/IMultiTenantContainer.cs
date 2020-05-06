@@ -4,6 +4,6 @@ namespace MultiTenancy.Container
 {
 	public interface IMultiTenantContainer
 	{
-		IServiceProvider GetTenantContainer(string tenantId);
+		IServiceProvider GetTenantContainer(string tenantName);
 	}
 }
