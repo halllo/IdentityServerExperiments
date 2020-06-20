@@ -21,7 +21,7 @@ namespace IdentityServerHost.Quickstart.UI
     /// This sample controller allows a user to revoke grants given to clients
     /// </summary>
     [SecurityHeaders]
-    [Authorize]
+    [Authorize("default")]
     public class GrantsController : Controller
     {
         private readonly IIdentityServerInteractionService _interaction;
@@ -113,7 +113,8 @@ namespace IdentityServerHost.Quickstart.UI
             var dbUser = TestUsers.Users.FirstOrDefault(u => string.Equals(u.SubjectId, subjectId, StringComparison.InvariantCultureIgnoreCase));
             if (dbUser == null)
             {
-                throw new Exception("no such user");
+                return new FidoCredentialDto[0];
+                //throw new Exception("no such user");
             }
 
             // 2. Get registered credentials from database

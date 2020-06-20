@@ -13,16 +13,16 @@
                 </div>
                 <div class="card-body">
                     <dl>
-                        @foreach (var claim in Model.AuthenticateResult.Principal.Claims)
+                        @foreach (var claim in Model.AuthenticateResult.Principal?.Claims ?? Enumerable.Empty<System.Security.Claims.Claim>())
                         {
-                            <dt>@claim.Type</dt>
+            <dt>@claim.Type</dt>
                             <dd>@claim.Value</dd>
-                        }
+}
                     </dl>
                 </div>
             </div>
         </div>
-        
+
         <div class="col">
             <div class="card">
                 <div class="card-header">
@@ -30,28 +30,24 @@
                 </div>
                 <div class="card-body">
                     <dl>
-                        @foreach (var prop in Model.AuthenticateResult.Properties.Items)
+                        @foreach (var prop in Model.AuthenticateResult.Properties?.Items ?? new Dictionary<string, string>())
                         {
-                            <dt>@prop.Key</dt>
+            <dt>@prop.Key</dt>
                             <dd>@prop.Value</dd>
-                        }
+}
                         @if (Model.Clients.Any())
                         {
-                            <dt>Clients</dt>
+            <dt>Clients</dt>
                             <dd>
-                            @{
-                                var clients = Model.Clients.ToArray();
-                                for(var i = 0; i < clients.Length; i++)
-                                {
-                                    <text>@clients[i]</text>
-                                    if (i < clients.Length - 1)
+                                @{ var clients = Model.Clients.ToArray();
+                                    for (var i = 0; i < clients.Length; i++)
                                     {
-                                        <text>, </text>
-                                    }
-                                }
-                            }
+                    <text>@clients[i]</text> if (i < clients.Length - 1)
+                    {
+<text>, </text> }
+} }
                             </dd>
-                        }
+}
                     </dl>
                 </div>
             </div>
