@@ -9,7 +9,7 @@ using Fido2NetLib.Objects;
 using IdentityModel;
 using IdentityServer4.Test;
 
-namespace IdentityServer4.Quickstart.UI
+namespace IdentityServerHost.Quickstart.UI
 {
 	public class TestUsers
 	{

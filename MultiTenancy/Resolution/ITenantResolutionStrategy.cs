@@ -2,8 +2,8 @@
 
 namespace MultiTenancy.Resolution
 {
-	public interface ITenantResolutionStrategy
-	{
-		Task<string> GetTenantIdentifierAsync();
-	}
+    public interface ITenantResolutionStrategy
+    {
+        Task<string> GetTenantIdentifierAsync();
+    }
 }

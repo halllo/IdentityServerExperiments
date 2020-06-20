@@ -7,24 +7,24 @@ using Microsoft.Extensions.Options;
 
 namespace MultiTenancy
 {
-	public class ScopedCookiePolicyMiddleware
-	{
-		private readonly RequestDelegate next;
+    public class ScopedCookiePolicyMiddleware
+    {
+        private readonly RequestDelegate next;
 
-		public ScopedCookiePolicyMiddleware(RequestDelegate next)
-		{
-			this.next = next;
-		}
+        public ScopedCookiePolicyMiddleware(RequestDelegate next)
+        {
+            this.next = next;
+        }
 
-		public Task Invoke(HttpContext context)
-		{
-			/* Middlewares requiring IOptions in the constructor cannot be tenant specific!
+        public Task Invoke(HttpContext context)
+        {
+            /* Middlewares requiring IOptions in the constructor cannot be tenant specific!
 			** Because  middleware constructors are invoked on application startup, before any tenant information is available, 
 			** those middlewares have to be wrapped and the options need to be taken from the request context instead.
 			*/
-			var options = context.RequestServices.GetRequiredService<IOptions<CookiePolicyOptions>>();
-			var inner = new CookiePolicyMiddleware(next, options);
-			return inner.Invoke(context);
-		}
-	}
+            var options = context.RequestServices.GetRequiredService<IOptions<CookiePolicyOptions>>();
+            var inner = new CookiePolicyMiddleware(next, options);
+            return inner.Invoke(context);
+        }
+    }
 }
