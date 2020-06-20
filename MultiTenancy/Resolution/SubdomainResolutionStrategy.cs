@@ -5,59 +5,59 @@ using Microsoft.Extensions.Hosting;
 
 namespace MultiTenancy.Resolution
 {
-	/// <summary>
-	/// Resolve the host to a tenant identifier
-	/// </summary>
-	public class SubdomainResolutionStrategy : ITenantResolutionStrategy
-	{
-		private readonly IHttpContextAccessor _httpContextAccessor;
-		private readonly IWebHostEnvironment environment;
+    /// <summary>
+    /// Resolve the host to a tenant identifier
+    /// </summary>
+    public class SubdomainResolutionStrategy : ITenantResolutionStrategy
+    {
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IWebHostEnvironment environment;
 
-		public SubdomainResolutionStrategy(IHttpContextAccessor httpContextAccessor, IWebHostEnvironment environment)
-		{
-			_httpContextAccessor = httpContextAccessor;
-			this.environment = environment;
-		}
+        public SubdomainResolutionStrategy(IHttpContextAccessor httpContextAccessor, IWebHostEnvironment environment)
+        {
+            _httpContextAccessor = httpContextAccessor;
+            this.environment = environment;
+        }
 
-		public async Task<string> GetTenantIdentifierAsync()
-		{
-			if (_httpContextAccessor.HttpContext == null)
-			{
-				return null;
-			}
-			else
-			{
-				const string devTenantOverrideCookieKey = nameof(devTenantOverrideCookieKey);
-				if ((this.environment.IsDevelopment() || this.environment.IsEnvironment("Local")) && _httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(devTenantOverrideCookieKey))
-				{
-					var tenantCookie = _httpContextAccessor.HttpContext.Request.Cookies[devTenantOverrideCookieKey];
-					return tenantCookie;
-				}
-				else
-				{
-					var subdomain = GetSubDomain(_httpContextAccessor.HttpContext);
-					return subdomain;
-				}
-			}
-		}
+        public async Task<string> GetTenantIdentifierAsync()
+        {
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                return null;
+            }
+            else
+            {
+                const string devTenantOverrideCookieKey = nameof(devTenantOverrideCookieKey);
+                if ((this.environment.IsDevelopment() || this.environment.IsEnvironment("Local")) && _httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(devTenantOverrideCookieKey))
+                {
+                    var tenantCookie = _httpContextAccessor.HttpContext.Request.Cookies[devTenantOverrideCookieKey];
+                    return tenantCookie;
+                }
+                else
+                {
+                    var subdomain = GetSubDomain(_httpContextAccessor.HttpContext);
+                    return subdomain;
+                }
+            }
+        }
 
-		/// <summary>
-		/// https://stackoverflow.com/questions/38549143/how-do-i-get-the-current-subdomain-within-net-core-middleware
-		/// </summary>
-		/// <param name="httpContext"></param>
-		/// <returns></returns>
-		private static string GetSubDomain(HttpContext httpContext)
-		{
-			var subDomain = string.Empty;
+        /// <summary>
+        /// https://stackoverflow.com/questions/38549143/how-do-i-get-the-current-subdomain-within-net-core-middleware
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <returns></returns>
+        private static string GetSubDomain(HttpContext httpContext)
+        {
+            var subDomain = string.Empty;
 
-			var host = httpContext.Request.Host.Host;
+            var host = httpContext.Request.Host.Host;
 
-			if (!string.IsNullOrWhiteSpace(host))
-			{
-				subDomain = host.Split('.')[0];
-			}
+            if (!string.IsNullOrWhiteSpace(host))
+            {
+                subDomain = host.Split('.')[0];
+            }
 
-			return subDomain.Trim().ToLower();
-		}
-	}
+            return subDomain.Trim().ToLower();
+        }
+    }
 }

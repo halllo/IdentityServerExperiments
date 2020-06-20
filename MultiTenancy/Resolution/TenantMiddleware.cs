@@ -1,28 +1,28 @@
-﻿using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace MultiTenancy.Resolution
 {
-	internal class TenantMiddleware<T> where T : Tenant
-	{
-		private readonly RequestDelegate next;
+    internal class TenantMiddleware<T> where T : Tenant
+    {
+        private readonly RequestDelegate next;
 
-		public TenantMiddleware(RequestDelegate next)
-		{
-			this.next = next;
-		}
+        public TenantMiddleware(RequestDelegate next)
+        {
+            this.next = next;
+        }
 
-		public async Task Invoke(HttpContext context)
-		{
-			if (!context.Items.ContainsKey(MultiTenantConstants.HttpContextTenantKey))
-			{
-				var tenantService = context.RequestServices.GetService(typeof(TenantAccessService<T>)) as TenantAccessService<T>;
-				context.Items.Add(MultiTenantConstants.HttpContextTenantKey, await tenantService.GetTenantAsync());
-			}
+        public async Task Invoke(HttpContext context)
+        {
+            if (!context.Items.ContainsKey(MultiTenantConstants.HttpContextTenantKey))
+            {
+                var tenantService = context.RequestServices.GetService(typeof(TenantAccessService<T>)) as TenantAccessService<T>;
+                context.Items.Add(MultiTenantConstants.HttpContextTenantKey, await tenantService.GetTenantAsync());
+            }
 
-			//Continue processing
-			if (next != null)
-				await next(context);
-		}
-	}
+            //Continue processing
+            if (next != null)
+                await next(context);
+        }
+    }
 }
