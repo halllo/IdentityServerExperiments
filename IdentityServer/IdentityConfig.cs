@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using IdentityServer4.Models;
-using IdentityServer4.Quickstart.UI;
 using IdentityServer4.Test;
+using IdentityServerHost.Quickstart.UI;
 
 namespace IdentityServer
 {
@@ -24,12 +24,21 @@ namespace IdentityServer
 			{
 				new ApiResource("books-api", "Books API")
 				{
-					Scopes = new List<Scope>
+					Scopes = new List<string>
 					{
-						new Scope("book.read", "Reading Books"),
-						new Scope("book.write", "Writing Books"),
+						"book.read",
+						"book.write",
 					}
 				}
+			};
+		}
+
+		public static IEnumerable<ApiScope> GetScopes()
+		{
+			return new List<ApiScope>
+			{
+				new ApiScope("book.read", "Reading Books"),
+				new ApiScope("book.write", "Writing Books"),
 			};
 		}
 		#endregion
@@ -100,6 +109,7 @@ namespace IdentityServer
 				},
 			};
 		}
+
 
 		public static List<TestUser> GetTestUsers()
 		{

@@ -46,6 +46,7 @@ namespace IdentityServer
 				.AddSigningCredentialFromKeyVault(config, serviceProvider.GetService<ILogger<Startup>>())
 				.AddInMemoryIdentityResources(IdentityConfig.GetIdentityResources())
 				.AddInMemoryApiResources(IdentityConfig.GetApis())
+				.AddInMemoryApiScopes(IdentityConfig.GetScopes())
 				.AddInMemoryClients(IdentityConfig.GetClients())
 				.AddTestUsers(IdentityConfig.GetTestUsers())
 				;

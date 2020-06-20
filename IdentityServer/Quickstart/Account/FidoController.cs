@@ -5,8 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
-using IdentityServer4.Quickstart.UI;
+using IdentityServer4;
 using IdentityServer4.Services;
+using IdentityServerHost.Quickstart.UI;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -406,7 +407,11 @@ namespace IdentityServer.Quickstart.Account
 							ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
 						};
 					};
-					await HttpContext.SignInAsync(dbUser.SubjectId, dbUser.Username, props);
+					var isuser = new IdentityServerUser(dbUser.SubjectId)
+					{
+						DisplayName = dbUser.Username
+					};
+					await HttpContext.SignInAsync(isuser, props);
 
 					if (context != null)
 					{
