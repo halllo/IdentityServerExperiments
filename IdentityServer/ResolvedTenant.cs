@@ -1,6 +1,4 @@
-﻿using MultiTenancy;
-
-namespace IdentityServer
+﻿namespace IdentityServer
 {
     public interface IResolvedTenant
     {
@@ -9,13 +7,11 @@ namespace IdentityServer
 
     public class ResolvedTenant : IResolvedTenant
     {
-        private readonly Tenant t;
-
-        public ResolvedTenant(Tenant t)
+        public ResolvedTenant(string tenant)
         {
-            this.t = t;
+            this.TenantName = tenant;
         }
 
-        public string TenantName => t?.Name ?? string.Empty;
+        public string TenantName { get; }
     }
 }

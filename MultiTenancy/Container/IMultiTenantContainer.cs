@@ -1,9 +1,10 @@
-﻿using System;
+﻿using Autofac.Extensions.DependencyInjection;
 
 namespace MultiTenancy.Container
 {
     public interface IMultiTenantContainer
     {
-        IServiceProvider GetTenantContainer(string tenantName);
+        void ConfigureOnDemand(string tenantName);
+        AutofacServiceProvider NewTenantScope(string tenantName);
     }
 }

@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿using Autofac.Multitenant;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
@@ -8,7 +8,7 @@ namespace MultiTenancy.Resolution
     /// <summary>
     /// Resolve the host to a tenant identifier
     /// </summary>
-    public class SubdomainResolutionStrategy : ITenantResolutionStrategy
+    public class SubdomainResolutionStrategy : ITenantIdentificationStrategy
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IWebHostEnvironment environment;
@@ -17,28 +17,6 @@ namespace MultiTenancy.Resolution
         {
             _httpContextAccessor = httpContextAccessor;
             this.environment = environment;
-        }
-
-        public async Task<string> GetTenantIdentifierAsync()
-        {
-            if (_httpContextAccessor.HttpContext == null)
-            {
-                return null;
-            }
-            else
-            {
-                const string devTenantOverrideCookieKey = nameof(devTenantOverrideCookieKey);
-                if ((this.environment.IsDevelopment() || this.environment.IsEnvironment("Local")) && _httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(devTenantOverrideCookieKey))
-                {
-                    var tenantCookie = _httpContextAccessor.HttpContext.Request.Cookies[devTenantOverrideCookieKey];
-                    return tenantCookie;
-                }
-                else
-                {
-                    var subdomain = GetSubDomain(_httpContextAccessor.HttpContext);
-                    return subdomain;
-                }
-            }
         }
 
         /// <summary>
@@ -58,6 +36,31 @@ namespace MultiTenancy.Resolution
             }
 
             return subDomain.Trim().ToLower();
+        }
+
+        public bool TryIdentifyTenant(out object tenantId)
+        {
+            if (_httpContextAccessor.HttpContext == null)
+            {
+                tenantId = null;
+                return false;
+            }
+            else
+            {
+                const string devTenantOverrideCookieKey = nameof(devTenantOverrideCookieKey);
+                if ((this.environment.IsDevelopment() || this.environment.IsEnvironment("Local")) && _httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(devTenantOverrideCookieKey))
+                {
+                    var tenantCookie = _httpContextAccessor.HttpContext.Request.Cookies[devTenantOverrideCookieKey];
+                    tenantId = tenantCookie;
+                    return true;
+                }
+                else
+                {
+                    var subdomain = GetSubDomain(_httpContextAccessor.HttpContext);
+                    tenantId = subdomain;
+                    return true;
+                }
+            }
         }
     }
 }

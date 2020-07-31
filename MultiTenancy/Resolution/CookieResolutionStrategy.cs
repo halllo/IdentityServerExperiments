@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using Autofac.Multitenant;
 using Microsoft.AspNetCore.Http;
 
 namespace MultiTenancy.Resolution
 {
-    public class CookieResolutionStrategy : ITenantResolutionStrategy
+    public class CookieResolutionStrategy : ITenantIdentificationStrategy
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
@@ -12,23 +12,26 @@ namespace MultiTenancy.Resolution
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<string> GetTenantIdentifierAsync()
+        public bool TryIdentifyTenant(out object tenantId)
         {
             if (_httpContextAccessor.HttpContext == null)
             {
-                return null;
+                tenantId = null;
+                return false;
             }
             else
             {
-                const string stpTenantCookieKey = "STP-Tenant";
+                const string stpTenantCookieKey = "devTenantOverrideCookieKey";
                 if (_httpContextAccessor.HttpContext.Request.Cookies.ContainsKey(stpTenantCookieKey))
                 {
                     var tenantCookie = _httpContextAccessor.HttpContext.Request.Cookies[stpTenantCookieKey];
-                    return tenantCookie;
+                    tenantId = tenantCookie;
+                    return true;
                 }
                 else
                 {
-                    return null;
+                    tenantId = null;
+                    return false;
                 }
             }
         }

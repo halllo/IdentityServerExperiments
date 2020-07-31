@@ -9,7 +9,7 @@ namespace MultiTenancy
 {
     public static class AuthenticationMinimumForTenant
     {
-        public static Builder AddAuthenticationMinimumForTenant(this ServiceCollection services)
+        public static Builder AddAuthenticationMinimumForTenant(this IServiceCollection services)
         {
             /*
 			 * Don't invoke services.AddAuthentication(); in each tenant service configuration!

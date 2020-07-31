@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using IdentityModel;
 using IdentityServer.Extended;
 using IdentityServer.ExternalAuth;
@@ -22,7 +21,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using MultiTenancy;
-using MultiTenancy.Resolution;
 using Newtonsoft.Json;
 
 namespace IdentityServer
@@ -40,10 +38,12 @@ namespace IdentityServer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMultiTenancy();
+
             services.AddCors(options => options.AddPolicy("mycustomcorspolicy", b => b.WithOrigins("http://meinetollewebsite.de").AllowAnyMethod().AllowAnyHeader()));
             services.AddMvc();
 
-            var serviceProvider = services.BuildServiceProvider();
+            var serviceProvider = services.BuildServiceProvider();//oh oh...
 
             services.AddSingleton<IConfigureOptions<CookieAuthenticationOptions>, ConfigureCookieOptions>();
             services.AddIdentityServer()
@@ -71,16 +71,12 @@ namespace IdentityServer
             services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
             services.AddTransientDecorator<IAuthorizeRequestValidator, ExtendedAuthorizeRequestValidator>();
 
-            services.AddMultiTenancy()
-                .WithResolutionStrategy<SubdomainResolutionStrategy>()
-                .WithStore<InMemoryTenantStore>(ServiceLifetime.Singleton)
-                ;
+            services.AddSingleton<IResolvedTenant>(new ResolvedTenant(""));
         }
 
-        public static void ConfigureMultiTenantServices(Tenant tenant, ContainerBuilder tenantContainer, IComponentContext applicationContainer)
+        public static void ConfigureMultiTenantServices(string tenant, IServiceCollection services, IContainer applicationContainer)
         {
             var config = applicationContainer.Resolve<IConfiguration>();
-            var services = new ServiceCollection();
 
             services.Configure<CookiePolicyOptions>(options =>
             {
@@ -95,7 +91,7 @@ namespace IdentityServer
                 .PrepareOAuthScheme<MicrosoftAccountOptions, MicrosoftAccountHandler>();
 
 
-            if (tenant.Name == "123")
+            if (tenant == "123")
             {
                 var authenticationBuilder = new AuthenticationBuilder(services);
                 authenticationBuilder.AddMicrosoftAccount("Microsoft", options =>
@@ -107,7 +103,7 @@ namespace IdentityServer
                     options.TokenEndpoint = $"https://login.microsoftonline.com/{config["MicrosoftAccountTenantId"]}/oauth2/v2.0/token";
                 });
             }
-            else if (tenant.Name == "win")
+            else if (tenant == "win")
             {
                 services.Configure<AuthenticationOptions>(o =>
                 {
@@ -134,7 +130,7 @@ namespace IdentityServer
                     options.ResponseType = "code";
                     options.SaveTokens = true;
 
-                    options.BackchannelHttpHandler = new RequestFromOnPremiseHttpMessageHandler(requestFromOnPremise, tenant.Name);
+                    options.BackchannelHttpHandler = new RequestFromOnPremiseHttpMessageHandler(requestFromOnPremise, tenant);
                     options.Configuration = JsonConvert.DeserializeObject<OpenIdConnectConfiguration>("{\"issuer\":\"https://localhost:44390\",\"jwks_uri\":\"https://localhost:44390/.well-known/openid-configuration/jwks\",\"authorization_endpoint\":\"https://localhost:44390/connect/authorize\",\"token_endpoint\":\"https://localhost:44390/connect/token\",\"userinfo_endpoint\":\"https://localhost:44390/connect/userinfo\",\"end_session_endpoint\":\"https://localhost:44390/connect/endsession\",\"check_session_iframe\":\"https://localhost:44390/connect/checksession\",\"revocation_endpoint\":\"https://localhost:44390/connect/revocation\",\"introspection_endpoint\":\"https://localhost:44390/connect/introspect\",\"device_authorization_endpoint\":\"https://localhost:44390/connect/deviceauthorization\",\"frontchannel_logout_supported\":true,\"frontchannel_logout_session_supported\":true,\"backchannel_logout_supported\":true,\"backchannel_logout_session_supported\":true,\"scopes_supported\":[\"openid\",\"profile\",\"book.read\",\"book.write\",\"offline_access\"],\"claims_supported\":[\"sub\",\"name\",\"family_name\",\"given_name\",\"middle_name\",\"nickname\",\"preferred_username\",\"profile\",\"picture\",\"website\",\"gender\",\"birthdate\",\"zoneinfo\",\"locale\",\"updated_at\"],\"grant_types_supported\":[\"authorization_code\",\"client_credentials\",\"refresh_token\",\"implicit\",\"password\",\"urn:ietf:params:oauth:grant-type:device_code\"],\"response_types_supported\":[\"code\",\"token\",\"id_token\",\"id_token token\",\"code id_token\",\"code token\",\"code id_token token\"],\"response_modes_supported\":[\"form_post\",\"query\",\"fragment\"],\"token_endpoint_auth_methods_supported\":[\"client_secret_basic\",\"client_secret_post\"],\"id_token_signing_alg_values_supported\":[\"RS256\"],\"subject_types_supported\":[\"public\"],\"code_challenge_methods_supported\":[\"plain\",\"S256\"],\"request_parameter_supported\":true}");
                     options.TokenValidationParameters = new TokenValidationParameters
                     {
@@ -142,15 +138,12 @@ namespace IdentityServer
                     };
                 });
             }
-
-            tenantContainer.Populate(services);
         }
         private class Jwks { public List<JsonWebKey> Keys { get; set; } }
 
         public void Configure(IApplicationBuilder app)
         {
             app.UseDeveloperExceptionPage();
-            app.UseMultiTenancy().UseMultiTenantContainer();
             app.UseStaticFiles(); // Install IdentityServer UI: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/IdentityServer/IdentityServer4.Quickstart.UI/release/get.ps1'))
             app.UseMiddleware<ScopedCookiePolicyMiddleware>();
             app.UseRouting();
