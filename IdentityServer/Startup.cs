@@ -40,14 +40,15 @@ namespace IdentityServer
         {
             services.AddMultiTenancy();
 
+            services.AddEarlyLogging(out var earlyLogger);
+            earlyLogger.LogInformation("starting to configure services...");
+
             services.AddCors(options => options.AddPolicy("mycustomcorspolicy", b => b.WithOrigins("http://meinetollewebsite.de").AllowAnyMethod().AllowAnyHeader()));
             services.AddMvc();
 
-            var serviceProvider = services.BuildServiceProvider();//oh oh...
-
             services.AddSingleton<IConfigureOptions<CookieAuthenticationOptions>, ConfigureCookieOptions>();
             services.AddIdentityServer()
-                .AddSigningCredentialFromKeyVault(config, serviceProvider.GetService<ILogger<Startup>>())
+                .AddSigningCredentialFromKeyVault(config, earlyLogger)
                 .AddInMemoryIdentityResources(IdentityConfig.GetIdentityResources())
                 .AddInMemoryApiResources(IdentityConfig.GetApis())
                 .AddInMemoryApiScopes(IdentityConfig.GetScopes())
@@ -72,6 +73,8 @@ namespace IdentityServer
             services.AddTransientDecorator<IAuthorizeRequestValidator, ExtendedAuthorizeRequestValidator>();
 
             services.AddSingleton<IResolvedTenant>(new ResolvedTenant(""));
+
+            earlyLogger.LogInformation("done configuring general services :)");
         }
 
         public static void ConfigureMultiTenantServices(string tenant, IServiceCollection services, IContainer applicationContainer)
