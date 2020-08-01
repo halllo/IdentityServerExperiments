@@ -2,9 +2,8 @@
 
 namespace MultiTenancy.Container
 {
-    public interface IMultiTenantContainer
+    public interface IMultitenantContainer
     {
-        void ConfigureOnDemand(string tenantName);
         AutofacServiceProvider NewTenantScope(string tenantName);
     }
 }

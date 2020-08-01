@@ -2,17 +2,18 @@
 using Autofac.Multitenant;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace MultiTenancy.Container
 {
-    public class MultiTenantConfigureOnDemandStartupFilter : IStartupFilter
+    internal class MultiTenantConfigureOnDemandStartupFilter : IStartupFilter
     {
         private readonly ITenantIdentificationStrategy tenantIdentificationStrategy;
+        private readonly MultitenantContainer multitenantContainer;
 
-        public MultiTenantConfigureOnDemandStartupFilter(ITenantIdentificationStrategy tenantIdentificationStrategy)
+        public MultiTenantConfigureOnDemandStartupFilter(ITenantIdentificationStrategy tenantIdentificationStrategy, MultitenantContainer multitenantContainer)
         {
             this.tenantIdentificationStrategy = tenantIdentificationStrategy;
+            this.multitenantContainer = multitenantContainer;
         }
 
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
@@ -21,10 +22,9 @@ namespace MultiTenancy.Container
             {
                 builder.Use(async (context, next) =>
                 {
-                    var mtc = context.RequestServices.GetService<IMultiTenantContainer>();
                     if (this.tenantIdentificationStrategy.TryIdentifyTenant(out object tenantId) && !string.IsNullOrWhiteSpace(tenantId?.ToString() ?? ""))
                     {
-                        mtc.ConfigureOnDemand(tenantId.ToString());
+                        this.multitenantContainer.ConfigureOnDemand(tenantId.ToString());
                     }
 
                     await next();

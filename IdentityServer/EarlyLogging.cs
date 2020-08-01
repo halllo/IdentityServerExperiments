@@ -56,19 +56,22 @@ namespace IdentityServer
 
             public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
             {
-                var logTState = typeof(ILogger).GetMethods().Where(m => m.Name == nameof(ILogger.Log) && m.ContainsGenericParameters).Single();
-
-                while (this.earlyLogger.logs.Count > 0)
+                return builder =>
                 {
-                    var log = this.earlyLogger.logs.Dequeue();
-                    logTState.MakeGenericMethod(log.tstate).Invoke(this.logger, new object[]
-                    {
-                        log.level, log.eventId, log.state, log.exception, log.formatter
-                    });
-                }
-                this.earlyLogger.Dispose();
+                    var logTState = typeof(ILogger).GetMethods().Where(m => m.Name == nameof(ILogger.Log) && m.ContainsGenericParameters).Single();
 
-                return next;
+                    while (this.earlyLogger.logs.Count > 0)
+                    {
+                        var log = this.earlyLogger.logs.Dequeue();
+                        logTState.MakeGenericMethod(log.tstate).Invoke(this.logger, new object[]
+                        {
+                        log.level, log.eventId, log.state, log.exception, log.formatter
+                        });
+                    }
+                    this.earlyLogger.Dispose();
+
+                    next(builder);
+                };
             }
         }
     }

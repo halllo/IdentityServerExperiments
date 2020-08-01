@@ -17,18 +17,19 @@ namespace IdentityServer
         {
             Console.Title = "IdentityServer";
             GenericHostBuilder(args).Build().Run();
+            //WebHostBuilder(args).Build().Run();
         }
 
         public static IWebHostBuilder WebHostBuilder(string[] args)
         {
-            var mtc = new MultiTenantContainer<CookieResolutionStrategy>(Startup.ConfigureMultiTenantServices);
-
             return WebHost.CreateDefaultBuilder(args)
                 .UseIISIntegration()
                 .ConfigureServices(services =>
                 {
                     services.AddSingleton<IServiceProviderFactory<IServiceCollection>>(
-                        new ServiceProviderFactoryGenericAdapter<ContainerBuilder>(mtc.Factory)
+                        new ServiceProviderFactoryGenericAdapter<ContainerBuilder>(
+                            MultitenantContainerFactory.New<CookieResolutionStrategy>(Startup.ConfigureMultiTenantServices)
+                        )
                     );
                     services.AddMultiTenancy();
                 })
@@ -37,10 +38,8 @@ namespace IdentityServer
 
         public static IHostBuilder GenericHostBuilder(string[] args)
         {
-            var mtc = new MultiTenantContainer<CookieResolutionStrategy>(Startup.ConfigureMultiTenantServices);
-
             return Host.CreateDefaultBuilder(args)
-                .UseServiceProviderFactory(mtc.Factory)
+                .UseServiceProviderFactory(MultitenantContainerFactory.New<CookieResolutionStrategy>(Startup.ConfigureMultiTenantServices))
                 .ConfigureLogging(logging =>
                 {
                     logging.AddAzureWebAppDiagnostics();
