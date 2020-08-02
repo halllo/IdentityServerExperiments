@@ -22,7 +22,7 @@ namespace MultiTenancy.Container
             {
                 builder.Use(async (context, next) =>
                 {
-                    if (this.tenantIdentificationStrategy.TryIdentifyTenant(out object tenantId) && !string.IsNullOrWhiteSpace(tenantId?.ToString() ?? ""))
+                    if (this.tenantIdentificationStrategy.TryIdentifyTenant(out object tenantId))
                     {
                         this.multitenantContainer.ConfigureOnDemand(tenantId.ToString());
                     }

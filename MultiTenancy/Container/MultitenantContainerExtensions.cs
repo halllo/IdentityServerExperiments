@@ -9,7 +9,7 @@ namespace MultiTenancy.Container
     {
         public static void ConfigureOnDemand(this MultitenantContainer mtc, string tenantName)
         {
-            if (!string.IsNullOrWhiteSpace(tenantName))
+            if (tenantName != null)
             {
                 if (!mtc.TenantIsConfigured(tenantName))
                 {

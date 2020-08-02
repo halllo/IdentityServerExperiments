@@ -10,7 +10,8 @@
   <ItemGroup>
     <PackageReference Include="Autofac.AspNetCore.Multitenant" Version="3.0.1" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.5" />
+    <PackageReference Include="Autofac.Multitenant" Version="5.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.6" />
   </ItemGroup>
 
 </Project>

@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using MultiTenancy;
 using MultiTenancy.Container;
 using MultiTenancy.Resolution;
 
@@ -16,8 +15,8 @@ namespace IdentityServer
         public static void Main(string[] args)
         {
             Console.Title = "IdentityServer";
-            GenericHostBuilder(args).Build().Run();
-            //WebHostBuilder(args).Build().Run();
+            //GenericHostBuilder(args).Build().Run();
+            WebHostBuilder(args).Build().Run();
         }
 
         public static IWebHostBuilder WebHostBuilder(string[] args)
@@ -31,7 +30,6 @@ namespace IdentityServer
                             MultitenantContainerFactory.New<CookieResolutionStrategy>(Startup.ConfigureMultiTenantServices)
                         )
                     );
-                    services.AddMultiTenancy();
                 })
                 .UseStartup<Startup>();
         }
