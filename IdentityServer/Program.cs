@@ -6,7 +6,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using MultiTenancy.Container;
-using MultiTenancy.Resolution;
 
 namespace IdentityServer
 {
@@ -27,7 +26,7 @@ namespace IdentityServer
                 {
                     services.AddSingleton<IServiceProviderFactory<IServiceCollection>>(
                         new ServiceProviderFactoryGenericAdapter<ContainerBuilder>(
-                            MultitenantContainerFactory.New<CookieResolutionStrategy>(Startup.ConfigureMultiTenantServices)
+                            MultitenantContainerFactory.New(Startup.ConfigureMultiTenantServices)
                         )
                     );
                 })
@@ -37,7 +36,7 @@ namespace IdentityServer
         public static IHostBuilder GenericHostBuilder(string[] args)
         {
             return Host.CreateDefaultBuilder(args)
-                .UseServiceProviderFactory(MultitenantContainerFactory.New<CookieResolutionStrategy>(Startup.ConfigureMultiTenantServices))
+                .UseServiceProviderFactory(MultitenantContainerFactory.New(Startup.ConfigureMultiTenantServices))
                 .ConfigureLogging(logging =>
                 {
                     logging.AddAzureWebAppDiagnostics();

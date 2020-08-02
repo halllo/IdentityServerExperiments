@@ -21,6 +21,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using MultiTenancy;
+using MultiTenancy.Container;
 using Newtonsoft.Json;
 
 namespace IdentityServer
@@ -38,7 +39,7 @@ namespace IdentityServer
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMultiTenancy();
+            services.AddMultiTenancy<TenantResolutionFromTokenValidationLibrary>();
 
             services.AddEarlyLogging(out var earlyLogger);
             earlyLogger.LogInformation("starting to configure services...");
@@ -72,7 +73,7 @@ namespace IdentityServer
             services.AddTransientDecorator<ICorsPolicyProvider, CorsPolicyProvider>();
             services.AddTransientDecorator<IAuthorizeRequestValidator, ExtendedAuthorizeRequestValidator>();
 
-            services.AddSingleton<IResolvedTenant>(new ResolvedTenant(""));
+            services.AddSingleton<IResolvedTenant>(new ResolvedTenant("default"));
 
             earlyLogger.LogInformation("done configuring general services :)");
         }
@@ -147,6 +148,19 @@ namespace IdentityServer
         public void Configure(IApplicationBuilder app)
         {
             app.UseDeveloperExceptionPage();
+
+            app.Use(async (context, next) =>
+            {
+                var mtc = context.RequestServices.GetRequiredService<IMultitenantContainer>();
+                using (var stpTenant = mtc.NewTenantScope("stp"))
+                {
+                    var tenant = stpTenant.GetRequiredService<IResolvedTenant>();
+                    System.Console.WriteLine("STP-Tenant: " + tenant.TenantName);
+                }
+
+                await next();
+            });
+
             app.UseStaticFiles(); // Install IdentityServer UI: iex ((New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/IdentityServer/IdentityServer4.Quickstart.UI/release/get.ps1'))
             app.UseMiddleware<ScopedCookiePolicyMiddleware>();
             app.UseRouting();
